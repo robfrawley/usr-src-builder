@@ -72,7 +72,7 @@ export VER_PHP_ON_UNSU=""
 
 export VER_ENV_DIST_SUPPORTED="wily,vivid,trusty,precise"
 
-export PKG_YML_FILEPATH=".package.yml"
+export PKG_YML_FILEPATH=".bldr.yml"
 export PKG_PRE_VARIABLE="scr_pkg_"
 export PKG_ENV_VARIABLE="${build_package:-x}"
 export PKG_REQ_VARIABLE="${PKG_PRE_VARIABLE}app_path,${PKG_PRE_VARIABLE}env_make,${PKG_PRE_VARIABLE}app_prep,${PKG_PRE_VARIABLE}app_post,${PKG_PRE_VARIABLE}env_post,${PKG_PRE_VARIABLE}php_exts,${PKG_PRE_VARIABLE}env_prep,${PKG_PRE_VARIABLE}env_post,${PKG_PRE_VARIABLE}php_conf"

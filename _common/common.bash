@@ -57,7 +57,7 @@ else
     fi
 fi
 
-if [ "${PKG_ENV_VARIABLE:-x}" == "x" ]
+if [[ "${PKG_ENV_VARIABLE:-x}" == "x" || "${PKG_ENV_VARIABLE:-x}" == "true" ]]
 then
     PKG_ENV_VARIABLE="${PKG_YML_FILEPATH}"
 fi
