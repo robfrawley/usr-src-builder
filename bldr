@@ -18,7 +18,7 @@ fi
 
 readonly BLDR_PATH_NAME="`cd $(dirname ${BASH_SOURCE[0]}) && pwd`"
 readonly BLDR_BASE_NAME="`basename ${BASH_SOURCE[0]}`"
-readonly BLDR_FILE_PATH="`realpath ${BLDR_PATH_NAME}/${BLDR_BASE_NAME}`"
+readonly BLDR_FILE_PATH="${BLDR_PATH_NAME}/${BLDR_BASE_NAME}"
 readonly BLDR_ROOT_PATH="$(pwd)"
 
 readonly BLDR_SRC_NAME="BLDR: Project State Builder"
