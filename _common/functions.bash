@@ -202,14 +202,16 @@ function outSequence()
 
 function opFailLogOutput()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        return
-    fi
-
     local f="${1}"
     local t="${2}"
     local os=" :: BUILD LOG OUTPUT [ ${t} ] |"
     local len="$((($(echo ${os} | wc -m) + 10)))"
+
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        colorSet "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
+        outBlkS "##" "CRIT" "Failure in ${t} task"
+        return
+    fi
 
     outWarning "The previous command(s) exited with error return code(s). Any available log" \
         "output will be dumped for review."
