@@ -1,0 +1,216 @@
+#!/usr/bin/env bash
+
+##
+# This file is part of `scr-be/src-run-bldr`
+#
+# (c) Rob Frawley 2nd <rmf@scr.be>
+#
+# For the full copyright and license information, view the LICENSE.md
+# file distributed with this source code.
+##
+
+set -e
+
+if [[ ${BLDR_DEBUG} == "true" ]]
+then
+    set -x
+fi
+
+readonly BLDR_PATH_NAME="`cd $(dirname ${BASH_SOURCE[0]}) && pwd`"
+readonly BLDR_BASE_NAME="`basename ${BASH_SOURCE[0]}`"
+readonly BLDR_FILE_PATH="`realpath ${BLDR_PATH_NAME}/${BLDR_BASE_NAME}`"
+readonly BLDR_ROOT_PATH="$(pwd)"
+
+readonly BLDR_SRC_NAME="BLDR: Project State Builder"
+readonly BLDR_SRC_AUTHOR="Rob Frawley 2nd <rmf AT src DOT run>"
+readonly BLDR_SRC_LICENSE="MIT License, https://rmf.mit-license.org>"
+readonly BLDR_SRC_VEMVER="0.9.0-development"
+
+export B_QUIET=0
+export B_VERY_QUIET=0
+export B_VERBOSE=0
+export B_VERY_VERBOSE=0
+
+function outputError()
+{
+    printf "\n`tput setaf 1`%s: `tput sgr0`" "$1"
+    printf "%s`tput sgr0`\n" "$2"
+}
+
+function outputWarning()
+{
+    if [[ ${B_VERY_QUIET} -eq 0 ]]; then
+        printf "\n`tput setaf 3`%s: `tput sgr0`" "$1"
+        printf "%s`tput sgr0`\n" "$2"
+    fi
+}
+
+function outputInfo()
+{
+    if [[ ${B_QUIET} -eq 0 ]]; then
+        outputWarning "$1" "$2"
+    fi
+}
+
+function outputCommandInfo()
+{
+    printf "\n$(tput rev) %s $(tput sgr0)\nAuthor  : %s\nLicense : %s\nVersion : %s\n" \
+        "$BLDR_SRC_NAME" "$BLDR_SRC_AUTHOR" "$BLDR_SRC_LICENSE" "$BLDR_SRC_VEMVER"
+}
+
+function outputCommandUsage()
+{
+    commands[2]='up-env'
+    commands[3]='up-app'
+    commands[5]='down-env'
+    commands[6]='down-app'
+
+    printf "\nUsage: "
+
+    local iteration=1
+
+    for C in ${commands[*]}; do
+        if [[ ${iteration} -ne 1 ]]; then
+            printf '       '
+        else
+            iteration=`echo $iteration + 1 | bc`
+        fi
+
+        printf "./`tput bold`%s [OPTIONS] -b %s`tput sgr0`\n" "$BLDR_BASE_NAME" "$C"
+    done
+
+    printf "\nOptions:\n"
+    printf "`tput bold`    -b `tput sgr0`   build mode: sets the runtime build mode for the session\n"
+    printf "`tput bold`    -d `tput sgr0`   enable debug command trace output\n"
+    printf "`tput bold`    -V `tput sgr0`   enable verbose output (use twice to increase verbosity)\n"
+    printf "`tput bold`    -q `tput sgr0`   enable quiet output (use twice to silent)\n"
+    printf "`tput bold`    -v `tput sgr0`   display script version string\n"
+    printf "`tput bold`    -h `tput sgr0`   display this usage/help message\n\n"
+}
+
+while getopts ":hvdVqb:" opt;
+do
+    case $opt in
+        h)
+            outputCommandUsage
+            exit 255
+        ;;
+
+        v)
+            outputCommandInfo
+            exit 255
+        ;;
+
+        q)
+            if [[ ${B_VERBOSE} -eq 1 ]];
+            then
+                outputError "Invalid option sequence" "Use of both the verbose \"-V\" and quiet \"-q\" options is prohibited as these options conflict."
+                outputCommandUsage
+                exit 255
+            fi
+
+            if [[ ${B_QUIET} -eq 1 ]];
+            then
+                export B_VERY_QUIET=1
+            fi
+            export B_QUIET=1
+        ;;
+
+        V)
+            if [[ ${B_QUIET} -eq 1 ]];
+            then
+                outputError "Invalid option sequence" "Use of both the verbose \"-V\" and quiet \"-q\" options is prohibited as these options conflict."
+                outputCommandInfo
+                exit 255
+            fi
+
+            if [[ ${B_VERBOSE} -eq 1 ]];
+            then
+                export B_VERY_VERBOSE=1
+            fi
+            export B_VERBOSE=1
+        ;;
+
+        d)
+            outputWarning "Debug mode enabled" "Issuing \"set -x\" to enable command tracing."
+            set -x
+            export BUILDER_DEBUG=1
+        ;;
+
+        b)
+            BLDR_C="$OPTARG"
+        ;;
+
+        \?)
+            outputError "Invalid option provided" "The passed option \"-$OPTARG\" is not valid."
+            exit 255
+        ;;
+    esac
+done
+
+if [[ -z "${BLDR_C+x}" ]]; then
+    outputError "Invalid options" "The build mode must be provided via the \"-b\" option."
+    outputCommandUsage
+    exit 255
+elif [[ "${BLDR_C}" != "up-env" && "${BLDR_C}" != "up-app" && "${BLDR_C}" != "down-env" && "${BLDR_C}" != "down-app" ]]; then
+    outputError "Invalid options" "The provided build mode \"${BLDR_C}\" is invalid."
+    outputCommandUsage
+    exit 255
+fi
+
+export ACTION=$BLDR_C
+
+type outLines &>> /dev/null || . ${BLDR_PATH_NAME}/_common/common.bash
+
+listing=(
+    ":Runtime Enviornment" \
+    "Enviornment:OS"       "${DISTRIB_ID} ${DISTRIB_RELEASE}"
+    "Enviornment:Action"   "${ACTION^^}" \
+    "Enviornment:Location" "${env_location^^}" \
+    "Enviornment:Travis"   "$(getYesOrNoForCompare ${env_location} ci)" \
+    "Enviornment:Config"   "${BLDR_ROOT_PATH}/${PKG_ENV_VARIABLE}" \
+    \
+    ":PHP/Engine Information" \
+    "Release:PHP"           "$(getMajorPHPVersion).x Series" \
+    "Supported:PHP:Version" "$(getYesOrNoForCompare ${VER_PHP_ON_UNSU:-x} "x") (PHP     v${VER_PHP})" \
+    "Supported:PHP:Engine"  "YES (Engine  ${VER_PHPAPI_ENG}/${VER_PHPAPI_MOD})" \
+    "Supported:PHP:Xdebug"  "YES (Xdebug  v${VER_PHP_XDEBUG})" \
+    "Supported:PHP:Opcache" "YES (Opcache v${VER_PHP_OPCACHE})" \
+    "Installed:PHPEnv"      "$(echo ${env_with_phpenv} | tr '[:lower:]' '[:upper:]') ${env_ver_phpenv}" \
+    "Installed:HHVM"        "$(echo ${env_with_hhvm} | tr '[:lower:]' '[:upper:]') ${env_ver_hhvm}" \
+    \
+    ":Package Configuration" \
+    "Environment:Make"    "${scr_pkg_env_make:-NONE}" \
+    "Environment:Prepare" "${scr_pkg_env_prep:-NONE}" \
+    "Environment:Postrun" "${scr_pkg_env_post:-NONE}" \
+    "PHP:Extensions"      "${scr_pkg_php_exts:-NONE}" \
+    "PHP:Configuration"   "${scr_pkg_php_conf:-NONE}" \
+    "Application:Prepare" "${scr_pkg_app_prep:-NONE}" \
+    "Application:Postrun" "${scr_pkg_app_post:-NONE}" \
+    "Application:Console" "${scr_pkg_app_path:-NONE}"
+)
+
+outListing "${listing[@]}"
+
+if [ ! ${VER_PHP_ON_5} ] && [ ! ${VER_PHP_ON_7} ]
+then
+    outError "Unsupported PHP version for auto-builds. Found ${VER_PHP}."
+fi
+
+STATE_FILE_INCLUDE="${BLDR_PATH_NAME}/$(basename ${BLDR_BASE_NAME} .bash)_${ACTION}.bash"
+
+if [[ ! -f ${STATE_FILE_INCLUDE} ]]
+then
+    outWarning "Operation file ${STATE_FILE_INCLUDE} does not exist."
+else
+    opSource "${STATE_FILE_INCLUDE}"
+
+    . ${STATE_FILE_INCLUDE}
+fi
+
+outComplete \
+    "All operations for \"${ACTION}\" routine completed without error."
+
+exit 0
+
+# EOF #
