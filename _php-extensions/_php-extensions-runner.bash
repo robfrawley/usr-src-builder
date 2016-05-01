@@ -159,7 +159,7 @@ then
     opDoneSection "Install \"${MOD_NAME}\" extension."
 else
     opFailLogOutput "${MOD_PECL_LOG}" "${MOD_NAME}"
-    opDoneSmall "Install \"${MOD_NAME}\" extension."
+    opDoneSection "Install \"${MOD_NAME}\" extension."
 fi
 
 # EOF #
