@@ -10,8 +10,8 @@
 ##
 
 MOD_NAME="igbinary"
-MOD_PECL_GIT=https://github.com/igbinary/igbinary.git
-MOD_PECL_GIT_BRANCH="php7-dev-playground1"
+MOD_PECL_GIT=https://github.com/igbinary/igbinary7
+MOD_PECL_GIT_BRANCH="master"
 MOD_PECL_FLAGS="--enable-igbinary"
 
 # EOF
