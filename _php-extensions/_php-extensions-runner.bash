@@ -141,7 +141,7 @@ if [[ ${MOD_PECL_RET} == 0 ]] && [[ $(isExtensionEnabled ${MOD_NAME}) != "true" 
     then
         opExec "${BIN_PHPENV} conf add ${INC_PHP_CONF_PATH}/${MOD_NAME}.ini"
 
-        ${BIN_PHPENV} config-add "${INC_PHP_CONF_PATH}/${MOD_NAME}.ini" &>> /dev/null || \
+        ${BIN_PHPENV} conf add "${INC_PHP_CONF_PATH}/${MOD_NAME}.ini" &>> /dev/null || \
             outWarning "Could not add ${MOD_NAME}.ini to PHP config."
 
         opExec "${BIN_PHPENV} rehash"
