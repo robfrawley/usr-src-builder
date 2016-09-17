@@ -17,6 +17,7 @@ export RT_COMMANDS_INC=false
 for e in "${RT_INCS[@]}"
 do
     RT_COMMANDS_ACT+=("${BIN_PHPENV} conf add ${RT_PATH}/${e}.ini")
+    RT_COMMANDS_ACT+=("${BIN_PHPENV} conf enable ${e}")
 done
 
 RT_COMMANDS_ACT+=("${BIN_PHPENV} rehash")
