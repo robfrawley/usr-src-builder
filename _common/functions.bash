@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ##
-# This file is part of `scr-be/shared-project-knowledge`
+# This file is part of `src-run/usr-src-builder`
 #
 # (c) Rob Frawley 2nd <rmf@scr.be>
 #
