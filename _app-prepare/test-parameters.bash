@@ -10,7 +10,8 @@
 ##
 
 RT_COMMANDS_ACT=(
-    "mv app/config/parameters.yml.test app/config/parameters.yml"
+	"rm -f app/config/parameters.yml"
+    "cp app/config/parameters.yml.test app/config/parameters.yml"
 )
 
 # EOF #
