@@ -10,7 +10,7 @@
 ##
 
 RT_COMMANDS_ACT=(
-    "${APP_MAKE_CLI} arthur:fixtures:load -n"
+    "${APP_MAKE_CLI} doctrine:fixtures:load -n"
 )
 
 # EOF #
