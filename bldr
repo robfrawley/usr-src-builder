@@ -26,8 +26,10 @@ readonly BLDR_SRC_AUTHOR="Rob Frawley 2nd <rmf AT src DOT run>"
 readonly BLDR_SRC_LICENSE="MIT License, https://rmf.mit-license.org>"
 readonly BLDR_SRC_VEMVER="0.9.0-development"
 
-readonly ACTION_LIST=(up down)
-readonly ENVIRONMENT_LIST=(app, env)
+readonly VALID_ACTION_TYPE=(up down)
+readonly VALID_ACTION_CONTEXT=(env app)
+readonly VALID_ACTION_CONTEXT_UP=(${VALID_ACTION_CONTEXT[@]})
+readonly VALID_ACTION_CONTEXT_DN=(app env)
 
 export B_QUIET=0
 export B_VERY_QUIET=0
@@ -91,8 +93,18 @@ function outputCommandUsage()
     printf "`tput bold`    -h `tput sgr0`   display this usage/help message\n\n"
 }
 
-while getopts ":hvdVqb:" opt;
-do
+function arrayContainsElement() 
+{
+    local e
+    
+    for e in "${@:2}"; do
+        [[ "$e" == "$1" ]] && return 0
+    done
+    
+    return 1
+}
+
+while getopts ":hvdVqb:" opt; do
     case $opt in
         h)
             outputCommandUsage
@@ -105,30 +117,26 @@ do
         ;;
 
         q)
-            if [[ ${B_VERBOSE} -eq 1 ]];
-            then
+            if [[ ${B_VERBOSE} -eq 1 ]]; then
                 outputError "Invalid option sequence" "Use of both the verbose \"-V\" and quiet \"-q\" options is prohibited as these options conflict."
                 outputCommandUsage
                 exit 255
             fi
 
-            if [[ ${B_QUIET} -eq 1 ]];
-            then
+            if [[ ${B_QUIET} -eq 1 ]]; then
                 export B_VERY_QUIET=1
             fi
             export B_QUIET=1
         ;;
 
         V)
-            if [[ ${B_QUIET} -eq 1 ]];
-            then
+            if [[ ${B_QUIET} -eq 1 ]]; then
                 outputError "Invalid option sequence" "Use of both the verbose \"-V\" and quiet \"-q\" options is prohibited as these options conflict."
                 outputCommandInfo
                 exit 255
             fi
 
-            if [[ ${B_VERBOSE} -eq 1 ]];
-            then
+            if [[ ${B_VERBOSE} -eq 1 ]]; then
                 export B_VERY_VERBOSE=1
             fi
             export B_VERBOSE=1
@@ -151,19 +159,35 @@ do
     esac
 done
 
+export ACTION=$BLDR_C
+export ACTION_TYPE=${ACTION%-*}
+export ACTION_CONTEXT=(${ACTION#*-})
+
 if [[ -z "${BLDR_C+x}" ]]; then
     outputError "Invalid options" "The build mode must be provided via the \"-b\" option."
     outputCommandUsage
     exit 255
-elif [[ "${BLDR_C}" != "up-env" && "${BLDR_C}" != "up-app" && "${BLDR_C}" != "down-env" && "${BLDR_C}" != "down-app" ]]; then
-    outputError "Invalid options" "The provided build mode \"${BLDR_C}\" is invalid."
+fi
+
+if [[ ! "${VALID_ACTION_TYPE[@]}" =~ "${ACTION_TYPE}" ]]; then
+    outputError "Invalid options" "The provided build type \"${ACTION_TYPE}\" is invalid."
     outputCommandUsage
     exit 255
 fi
 
-export ACTION=$BLDR_C
-export ACTION_TYPE=${ACTION%-*}
-export ACTION_CONTEXT=${ACTION#*-}
+if [[ ! "${VALID_ACTION_CONTEXT[@]}" =~ "${ACTION_CONTEXT}" ]]; then
+    if [[ "${ACTION_CONTEXT}" == "${ACTION_TYPE}" ]]; then
+        if [[ "${ACTION_TYPE}" == "up" ]]; then
+            ACTION_CONTEXT=(${VALID_ACTION_CONTEXT_UP[@]})
+        else
+            ACTION_CONTEXT=(${VALID_ACTION_CONTEXT_DN[@]})
+        fi
+    else
+        outputError "Invalid options" "The provided build context \"${ACTION_CONTEXT}\" is invalid."
+        outputCommandUsage
+        exit 255
+    fi
+fi
 
 type writeLines &>> /dev/null || . ${BLDR_PATH_NAME}/_common/common.bash
 
@@ -197,23 +221,24 @@ listing=(
 
 writeDefinitionListing "${listing[@]}"
 
-if [ ! ${VER_PHP_ON_5} ] && [ ! ${VER_PHP_ON_7} ]
-then
+if [ ! ${VER_PHP_ON_5} ] && [ ! ${VER_PHP_ON_7} ]; then
     writeError "Unsupported PHP version for auto-builds. Found ${VER_PHP}."
 fi
 
-STATE_FILE_INCLUDE="${BLDR_PATH_NAME}/$(basename ${BLDR_BASE_NAME} .bash)_${ACTION}.bash"
+for context in ${ACTION_CONTEXT[@]}; do
+    export ACTION="${ACTION_TYPE}-${context}"
+    ACTION_FILE_INCLUDE="${BLDR_PATH_NAME}/$(basename ${BLDR_BASE_NAME} .bash)_${ACTION}.bash"
 
-if [[ ! -f ${STATE_FILE_INCLUDE} ]]
-then
-    writeWarning "$(printf 'Operation file "%s" does not exist!' ${STATE_FILE_INCLUDE})"
-    exit 1
-fi
+    if [[ ! -f ${ACTION_FILE_INCLUDE} ]]; then
+        writeWarning "$(printf 'Operation file "%s" does not exist!' ${ACTION_FILE_INCLUDE})"
+        exit 1
+    fi
 
-writeSectionEnter "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
-writeSourcedFile   "${STATE_FILE_INCLUDE}"
-. ${STATE_FILE_INCLUDE}
-writeSectionExit  "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
+    writeSectionEnter "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
+    writeSourcedFile   "${ACTION_FILE_INCLUDE}"
+    . ${ACTION_FILE_INCLUDE}
+    writeSectionExit  "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
+done
 
 writeComplete "All operations for \"${ACTION}\" routine completed without error."
 

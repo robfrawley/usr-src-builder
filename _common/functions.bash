@@ -227,7 +227,7 @@ function writeFailedLogOutput()
         return
     fi
 
-    writeWarning "The previous command(s) exited with error return code(s). Any available log" \
+    writeWarning "The previous command(s) errored. Any available log" \
         "output will be dumped for review."
 
     sleep 2
