@@ -22,7 +22,7 @@ done
 
 RT_COMMANDS_ACT+=("${BIN_PHPENV} rehash")
 
-opSource "${RT_PATH}/_php-configuration-runner.bash"
+writeSourcedFile "${RT_PATH}/_php-configuration-runner.bash"
 . "${RT_PATH}/_php-configuration-runner.bash"
 
 # EOF #

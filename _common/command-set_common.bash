@@ -14,7 +14,7 @@ then
     RT_MODE_DESC="${RT_MODE}"
 fi
 
-opStart "Running \"${RT_MODE_DESC^^}\""
+writeEnvironmentEnter "${RT_MODE_DESC}"
 
 RT_INDEX=-1
 RT_COUNT=0
@@ -42,14 +42,14 @@ do
     then
         RT_COMMANDS_ACT=false
 
-        opSource "${RT_FILEPATH_INC}"
+        writeSourcedFile "${RT_FILEPATH_INC}"
 
         . ${RT_FILEPATH_INC}
     fi
 
     if [[ ${RT_COMMANDS_ACT} == false ]] || [[ ${#RT_COMMANDS_ACT[@]} == 0 ]]
     then
-        outWarning "No operation commands defined in ${RT_FILEPATH_INC}"
+        writeWarning "No operation commands defined in ${RT_FILEPATH_INC}"
         continue
     fi
 
@@ -58,7 +58,7 @@ do
 
     if [[ ${RT_ENV_MAKE_ENTER_DIR} != false ]]
     then
-        opExec "cd ${MOD_ENV_MAKE_BLD}"
+        writeExecuted "cd ${MOD_ENV_MAKE_BLD}"
         cd ${MOD_ENV_MAKE_BLD}
     fi
 
@@ -66,7 +66,7 @@ do
     do
         RT_COMMANDS_RET_SINGLE=0
 
-        opExec "${command}"
+        writeExecuted "${command}"
         ${command} &>> ${RT_FILEPATH_LOG} || RT_COMMANDS_RET_SINGLE=1
 
         RT_COUNT=$(((${RT_COUNT} + 1)))
@@ -77,12 +77,12 @@ do
             continue
         fi
 
-        outWarning "Attempting fallback command due to previous command failure."
+        writeWarning "Attempting fallback command due to previous command failure."
 
         RT_COMMANDS_RET_SINGLE=0
         command_fallback=${RT_COMMANDS_ACT_FB[$RT_INDEX]}
 
-        opExec "${command_fallback}"
+        writeExecuted "${command_fallback}"
         ${command_fallback} &>> ${RT_FILEPATH_LOG} || RT_COMMANDS_RET_SINGLE=1
 
         if [[ ${RT_COMMANDS_RET_SINGLE} == 1 ]]
@@ -93,16 +93,15 @@ do
 
     if [[ ${RT_COMMANDS_RET} != 0 ]]
     then
-        opFailLogOutput "${RT_FILEPATH_LOG}" "${RT_MODE}:${c}"
+        writeFailedLogOutput "${RT_FILEPATH_LOG}" "${RT_MODE}:${c}"
     fi
 done
 
-if [[ ${RT_COUNT} == 0 ]]
-then
-    outWarning "No commands executed for \"${RT_MODE_DESC^^}\""
+if [[ ${RT_COUNT} == 0 ]] && [[ "${B_VERBOSE}" -eq 1 ]]; then
+    writeWarning "$(printf 'No commands executed for "%s:%s[%s]" context' ${ACTION_CONTEXT} ${ACTION_TYPE} "${RT_MODE_DESC,,}")"
 fi
 
-opDone "Running \"${RT_MODE_DESC^^}\""
+writeEnvironmentExit "${RT_MODE_DESC}"
 
 export RT_MODE_APPEND=false
 export RT_MODE=""

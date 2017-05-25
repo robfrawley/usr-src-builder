@@ -13,15 +13,15 @@ export RT_COMMANDS_RET=0
 export RT_COMMANDS_ACT=()
 export RT_COMMANDS_ACT_FB=()
 
-opStart "Running \"${RT_MODE_DESC^^}\" external operations."
+writeEnter "Running \"${RT_MODE_DESC^^}\" external operations."
 
 for e in "${RT_INCS[@]}"
 do
-	opSource "${RT_PATH}/_php-extensions-runner.bash"
+	writeSourcedFile "${RT_PATH}/_php-extensions-runner.bash"
 	export MOD_NAME=${e}
 	. "${RT_PATH}/_php-extensions-runner.bash"
 done
 
-opDone "Running \"${RT_MODE_DESC^^}\" external operations."
+writeExit "Running \"${RT_MODE_DESC^^}\" external operations."
 
 # EOF #

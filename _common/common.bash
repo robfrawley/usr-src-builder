@@ -15,14 +15,14 @@ readonly BLDR_COMMON_PATH_NAME="`cd $(dirname ${BASH_SOURCE[0]}) && pwd`"
 . ${BLDR_COMMON_PATH_NAME}/variables.bash
 
 . /etc/lsb-release || \
-    outError "Automatic builds only supported on Ubuntu at this time. Could not find lsb_release file."
+    writeError "Automatic builds only supported on Ubuntu at this time. Could not find lsb_release file."
 
 [[ $(valueInList ${DISTRIB_CODENAME:-x} ${VER_ENV_DIST_SUPPORTED}) != "true" ]] || \
-    outError "Automatic builds only supported on OS versions (${VER_ENV_DIST_SUPPORTED}) at this time." \
+    writeError "Automatic builds only supported on OS versions (${VER_ENV_DIST_SUPPORTED}) at this time." \
     "Found version ${DISTRIB_CODENAME}."
 
 [[ "${BIN_PHP:-x}" == "x" ]] && \
-    outError "Could not find a valid PHP binary within your configured path: \"${PATH}\"."
+    writeError "Could not find a valid PHP binary within your configured path: \"${PATH}\"."
 
 if [ "${BIN_HHVM:-x}" == "x" ]
 then
@@ -63,7 +63,7 @@ then
 fi
 
 if [ ! -f "${BLDR_ROOT_PATH}/${PKG_ENV_VARIABLE}" ]; then
-    outError "Unable to find the package configuration. This must be defined and set to the" \
+    writeError "Unable to find the package configuration. This must be defined and set to the" \
         "location of your configuration YAML, or simply true to use the default path."
 fi
 

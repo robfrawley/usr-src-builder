@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-outInfo "Intentional skip: extension not ported to PHP7 yet."
+writeInfo "Intentional skip: extension not ported to PHP7 yet."
 MOD_PECL_RET=1
 
 # EOF

@@ -9,12 +9,26 @@
 # file distributed with this source code.
 ##
 
-function newLine()
+function colorAssign()
+{
+    if [[ -n ${1} ]] && [[ ${1} != false ]]; then CLR_PRE="${1}"; fi
+    if [[ -n ${2} ]] && [[ ${1} != false ]]; then CLR_HDR="${2}"; fi
+    if [[ -n ${3} ]] && [[ ${1} != false ]]; then CLR_TXT="${3}"; fi
+}
+
+function colorReset()
+{
+    CLR_TXT=""
+    CLR_PRE=""
+    CLR_HDR=""
+}
+
+function writeNewLine()
 {
     echo -en "\n"
 }
 
-function outLines()
+function writeLines()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -30,7 +44,7 @@ function outLines()
 
     if [[ ${OUT_PRE_LINE} == true ]]
     then
-        outPrefix "${p}"
+        writePrefix "${p}"
     fi
 
     for l in ${@:-}
@@ -47,10 +61,10 @@ function outLines()
         then
             len=$(echo "${l}" | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | wc -m)
             ind=true
-            newLine
+            writeNewLine
             if [[ ${OUT_PRE_LINE} == true ]]
             then
-                outPrefix "${p}"
+                writePrefix "${p}"
             fi
         fi
 
@@ -84,7 +98,7 @@ function outLines()
 
     if [[ ${OUT_NEW_LINE} == true ]]
     then
-        newLine
+        writeNewLine
         OUT_NEW_LINE=true
     else
         OUT_NEW_LINE=true
@@ -95,7 +109,7 @@ function outLines()
     OUT_PRE_LINE=true
 }
 
-function outTitle()
+function writeTitle()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -107,16 +121,16 @@ function outTitle()
 
     if [[ $s == true ]]
     then
-        outPrefix ${p} true
-        outLines ${p} "${CLR_HDR_D}${CLR_HDR}${l}${CLR_RST}"
+        writePrefix ${p} true
+        writeLines ${p} "${CLR_HDR_D}${CLR_HDR}${l}${CLR_RST}"
     else
-        outLines ${p} "${CLR_HDR_D}${CLR_HDR}${l}${CLR_RST}"
+        writeLines ${p} "${CLR_HDR_D}${CLR_HDR}${l}${CLR_RST}"
     fi
 
-    if [[ $s == true ]]; then outPrefix ${p} true; fi
+    if [[ $s == true ]]; then writePrefix ${p} true; fi
 }
 
-function outPrefix()
+function writePrefix()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -126,10 +140,10 @@ function outPrefix()
 
     echo -en "${CLR_PRE_D}${CLR_PRE}${1}${CLR_RST}"
 
-    if [[ ${2} == true ]]; then newLine; fi
+    if [[ ${2} == true ]]; then writeNewLine; fi
 }
 
-function outBlkL()
+function writeBlockLarge()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -139,12 +153,12 @@ function outBlkL()
     local t="${2:-BLOCK}"
     local l="${@:3}"
 
-    outTitle  ${p} ${t}
-    outLines  ${p} ${l[@]}
-    outPrefix ${p} true
+    writeTitle  ${p} ${t}
+    writeLines  ${p} ${l[@]}
+    writePrefix ${p} true
 }
 
-function outBlkS()
+function writeBlockSmall()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -155,13 +169,13 @@ function outBlkS()
     local l="${@:3}"
 
     OUT_NEW_LINE=false
-    outTitle ${p} "${t}" false
+    writeTitle ${p} "${t}" false
     OUT_PRE_LINE=false
     OUT_SPACE_F=0
-    outLines ${p} ${l[@]}
+    writeLines ${p} ${l[@]}
 }
 
-function outBlkM()
+function writeBlock()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -171,11 +185,11 @@ function outBlkM()
     local t="${2:-BLOCK}"
     local l="${@:3}"
 
-    outTitle ${p} "${t}" false
-    outLines ${p} ${l[@]}
+    writeTitle ${p} "${t}" false
+    writeLines ${p} ${l[@]}
 }
 
-function outSequence()
+function writeSequence()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
@@ -200,7 +214,7 @@ function outSequence()
     colorReset
 }
 
-function opFailLogOutput()
+function writeFailedLogOutput()
 {
     local f="${1}"
     local t="${2}"
@@ -208,58 +222,58 @@ function opFailLogOutput()
     local len="$((($(echo ${os} | wc -m) + 10)))"
 
     if [[ "${B_QUIET}" -eq 1 ]]; then
-        colorSet "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
-        outBlkS "##" "CRIT" "Failure in ${t} task"
+        colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
+        writeBlockSmall "##" "CRIT" "Failure in ${t} task"
         return
     fi
 
-    outWarning "The previous command(s) exited with error return code(s). Any available log" \
+    writeWarning "The previous command(s) exited with error return code(s). Any available log" \
         "output will be dumped for review."
 
     sleep 2
 
     echo -en "  " && \
         echo -en "${CLR_L_YELLOW}+" &&\
-        outSequence ${len} "-" "${CLR_L_YELLOW}" && \
+        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
         echo -en "${CLR_L_YELLOW}+\n" &&\
         echo -en "  | ${CLR_B_YELLOW}START DUMP${CLR_L_YELLOW}${os}" && \
-        newLine && \
+        writeNewLine && \
         echo -en "  +" && \
-        outSequence ${len} "-" "${CLR_L_YELLOW}" && \
+        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
         echo -en "${CLR_L_YELLOW}+${CLR_RST}" &&\
-        newLine
+        writeNewLine
 
     if [[ -f ${f} ]]
     then
         cat ${f} | sed '/^\s*$/d'
     else
         echo -en "  ${CLR_B_RED}ERROR --- ${CLR_L_RED}No log output ot log file \"${f}\" is not present.${CLR_RST}" && \
-            newLine
+            writeNewLine
     fi
 
     local len="$((($(echo ${os} | wc -m) + 8)))"
     echo -en "  " && \
         echo -en "${CLR_L_YELLOW}+" &&\
-        outSequence ${len} "-" "${CLR_L_YELLOW}" && \
+        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
         echo -en "${CLR_L_YELLOW}+\n" &&\
         echo -en "  ${CLR_L_YELLOW}|${CLR_B_YELLOW} END DUMP${CLR_L_YELLOW}${os}" && \
-        newLine && \
+        writeNewLine && \
         echo -en "  +" && \
-        outSequence ${len} "-" "${CLR_L_YELLOW}" && \
+        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
         echo -en "${CLR_L_YELLOW}+${CLR_RST}" &&\
-        newLine
+        writeNewLine
 
     rm -fr ${f}
 
     sleep 2
 }
 
-function opLogBuild()
+function appendLogBufferLines()
 {
     LOG_BUF+=("${@}")
 }
 
-function opLogFlush()
+function flushLogBufferLines()
 {
     if [[ "${B_QUIET}" -eq 1 ]]; then
         LOG_BUF=()
@@ -271,173 +285,186 @@ function opLogFlush()
 
     if [[ ${#LOG_BUF[@]} -lt 1 ]]
     then
-        outWarning "No log build lines to flush."
+        writeWarning "No log build lines to flush."
     fi
 
     for l in "${LOG_BUF[@]}"
     do
-        colorSet "${CLR_L_BLUE}" "${CLR_L_BLUE}"
+        colorAssign "${CLR_L_BLUE}" "${CLR_L_BLUE}"
 
         OUT_NEW_LINE=false
-        outTitle ${p} ${t} false
+        writeTitle ${p} ${t} false
 
         OUT_PRE_LINE=false && OUT_SPACE_F=0 && OUT_SPACE_N=5
-        outLines ${p} "${l[@]}"
+        writeLines ${p} "${l[@]}"
     done
 
     colorReset
-    newLine
+    writeNewLine
 }
 
-function colorSet()
-{
-    if [[ -n ${1} ]] && [[ ${1} != false ]]; then CLR_PRE="${1}"; fi
-    if [[ -n ${2} ]] && [[ ${1} != false ]]; then CLR_HDR="${2}"; fi
-    if [[ -n ${3} ]] && [[ ${1} != false ]]; then CLR_TXT="${3}"; fi
-}
-
-function colorReset()
-{
-    CLR_TXT=""
-    CLR_PRE=""
-    CLR_HDR=""
-}
-
-function opStart()
+function writeEnter()
 {
     if [[ "${B_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
-    outBlkM ">>" "OPEN" "${@}"
+    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    writeBlockSmall ">>" "INIT" "${@}"
     colorReset
 }
 
-function opStartSection()
-{
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
-        return
-    fi
-
-    colorSet "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
-    outBlkS "--" "OPEN" "${@}"
-    colorReset
-}
-
-function opDone()
-{
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
-        return
-    fi
-
-    colorSet "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
-    outBlkM "<<" "STOP" "${@}"
-    colorReset
-}
-
-function opDoneSection()
-{
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
-        return
-    fi
-
-    colorSet "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
-    outBlkS "--" "STOP" "${@}"
-    colorReset
-}
-
-function opFail()
+function writeEnvironmentEnter()
 {
     if [[ "${B_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_L_RED}" "${CLR_L_RED}" "${CLR_L_RED}"
-    outBlkM "##" "FAIL" "${@}"
+    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    writeBlockSmall ">>" "INIT" "$(printf 'Running "%s" operations' "${1,,}")"
     colorReset
 }
 
-function opFailSection()
+function writeSectionEnter()
 {
     if [[ "${B_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
-    outBlkS "##" "FAIL" "${@}"
+    colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
+    writeBlockSmall "->" "INIT" "${@}"
     colorReset
 }
 
-function opExec()
+function writeExit()
 {
     if [[ "${B_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_L_PURPLE}" "${CLR_L_PURPLE}"
-    outBlkS "++" "CALL" "${@}"
+    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    writeBlockSmall "<<" "DONE" "${@}"
     colorReset
 }
 
-function opSource()
+function writeEnvironmentExit()
 {
-    if [[ ${OUT_TYPE_SOURCE} == false ]]
-    then
+    if [[ "${B_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_YELLOW}" "${CLR_YELLOW}"
-    outBlkS "--" "INCS" "${@}"
+    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    writeBlockSmall "<<" "DONE" "$(printf 'Finished "%s" operations' "${1,,}")"
     colorReset
 }
 
-function outInfo()
-{
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        return
-    fi
-
-    colorSet "${CLR_YELLOW}" "${CLR_YELLOW}"
-    outBlkS "--" "INFO" "${@}"
-    colorReset
-}
-
-function outWarning()
+function writeSectionExit()
 {
     if [[ "${B_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_L_RED}" "${CLR_L_RED}"
-    outBlkL "!!" "WARN" "${@}"
+    colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
+    writeBlockSmall "<-" "DONE" "${@}"
     colorReset
 }
 
-function outError()
+function writeCritical()
+{
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_L_RED}" "${CLR_L_RED}" "${CLR_L_RED}"
+    writeBlock "##" "FAIL" "${@}"
+    colorReset
+}
+
+function writeSectionCritical()
+{
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
+    writeBlockSmall "##" "FAIL" "${@}"
+    colorReset
+}
+
+function writeExecuted()
+{
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_L_PURPLE}" "${CLR_L_PURPLE}"
+    writeBlockSmall "++" "EXEC" "${@}"
+    colorReset
+}
+
+function writeSourcedFile()
+{
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
+    writeBlockSmall "--" "FILE" "${@}"
+    colorReset
+}
+
+function writeInfo()
+{
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
+    writeBlockSmall "--" "INFO" "${@}"
+    colorReset
+}
+
+function writeWarning()
+{
+    if [[ "${B_QUIET}" -eq 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_L_RED}" "${CLR_L_RED}"
+
+    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+        writeBlockSmall "!!" "WARN" "${@}"
+    else
+        writeBlockLarge "!!" "WARN" "${@}"
+    fi
+
+    colorReset
+}
+
+function writeError()
 {
     if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
-    outBlkL "##" "CRIT" "${@}"
+    colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
+    writeBlockLarge "##" "CRIT" "${@}"
     colorReset
     exit -1
 }
 
-function outComplete()
+function writeComplete()
 {
     if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorSet "${CLR_L_WHITE}" "${CLR_L_WHITE}" "${CLR_L_WHITE}"
-    outBlkL "--" "EXITING" "${@}"
+    colorAssign "${CLR_L_WHITE}" "${CLR_L_WHITE}" "${CLR_L_WHITE}"
+    writeBlockLarge "--" "EXITING" "${@}"
     colorReset
 }
 
-function outListing()
+function writeDefinitionListing()
 {
     if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
         return

@@ -26,6 +26,9 @@ readonly BLDR_SRC_AUTHOR="Rob Frawley 2nd <rmf AT src DOT run>"
 readonly BLDR_SRC_LICENSE="MIT License, https://rmf.mit-license.org>"
 readonly BLDR_SRC_VEMVER="0.9.0-development"
 
+readonly ACTION_LIST=(up down)
+readonly ENVIRONMENT_LIST=(app, env)
+
 export B_QUIET=0
 export B_VERY_QUIET=0
 export B_VERBOSE=0
@@ -159,8 +162,10 @@ elif [[ "${BLDR_C}" != "up-env" && "${BLDR_C}" != "up-app" && "${BLDR_C}" != "do
 fi
 
 export ACTION=$BLDR_C
+export ACTION_TYPE=${ACTION%-*}
+export ACTION_CONTEXT=${ACTION#*-}
 
-type outLines &>> /dev/null || . ${BLDR_PATH_NAME}/_common/common.bash
+type writeLines &>> /dev/null || . ${BLDR_PATH_NAME}/_common/common.bash
 
 listing=(
     ":Runtime Enviornment" \
@@ -190,26 +195,27 @@ listing=(
     "Application:Console" "${scr_pkg_app_path:-NONE}"
 )
 
-outListing "${listing[@]}"
+writeDefinitionListing "${listing[@]}"
 
 if [ ! ${VER_PHP_ON_5} ] && [ ! ${VER_PHP_ON_7} ]
 then
-    outError "Unsupported PHP version for auto-builds. Found ${VER_PHP}."
+    writeError "Unsupported PHP version for auto-builds. Found ${VER_PHP}."
 fi
 
 STATE_FILE_INCLUDE="${BLDR_PATH_NAME}/$(basename ${BLDR_BASE_NAME} .bash)_${ACTION}.bash"
 
 if [[ ! -f ${STATE_FILE_INCLUDE} ]]
 then
-    outWarning "Operation file ${STATE_FILE_INCLUDE} does not exist."
-else
-    opSource "${STATE_FILE_INCLUDE}"
-
-    . ${STATE_FILE_INCLUDE}
+    writeWarning "$(printf 'Operation file "%s" does not exist!' ${STATE_FILE_INCLUDE})"
+    exit 1
 fi
 
-outComplete \
-    "All operations for \"${ACTION}\" routine completed without error."
+writeSectionEnter "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
+writeSourcedFile   "${STATE_FILE_INCLUDE}"
+. ${STATE_FILE_INCLUDE}
+writeSectionExit  "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
+
+writeComplete "All operations for \"${ACTION}\" routine completed without error."
 
 exit 0
 
