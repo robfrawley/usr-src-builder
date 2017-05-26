@@ -327,10 +327,6 @@ function writeEnvironmentEnter()
 
 function writeSectionEnter()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        return
-    fi
-
     colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
     writeBlockSmall "->" "INIT" "${@}"
     colorReset
@@ -360,10 +356,6 @@ function writeEnvironmentExit()
 
 function writeSectionExit()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        return
-    fi
-
     colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
     writeBlockSmall "<-" "DONE" "${@}"
     colorReset
@@ -404,10 +396,6 @@ function writeExecuted()
 
 function writeSourcedFile()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        return
-    fi
-
     colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
     writeBlockSmall "--" "FILE" "${@}"
     colorReset
