@@ -227,6 +227,9 @@ fi
 
 for context in ${ACTION_CONTEXT[@]}; do
     export ACTION="${ACTION_TYPE}-${context}"
+    export ACTION_TYPE=${ACTION%-*}
+    export ACTION_CONTEXT=(${ACTION#*-})
+
     ACTION_FILE_INCLUDE="${BLDR_PATH_NAME}/$(basename ${BLDR_BASE_NAME} .bash)_${ACTION}.bash"
 
     if [[ ! -f ${ACTION_FILE_INCLUDE} ]]; then
