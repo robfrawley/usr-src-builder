@@ -13,7 +13,7 @@ export RT_COMMANDS_RET=0
 export RT_COMMANDS_ACT=()
 export RT_COMMANDS_ACT_FB=()
 
-writeEnter "Running \"${RT_MODE_DESC^^}\" external operations."
+writeEnvironmentEnter "${RT_MODE_DESC}"
 
 for e in "${RT_INCS[@]}"
 do
@@ -22,6 +22,6 @@ do
 	. "${RT_PATH}/_php-extensions-runner.bash"
 done
 
-writeExit "Running \"${RT_MODE_DESC^^}\" external operations."
+writeEnvironmentExit "${RT_MODE_DESC}"
 
 # EOF #
