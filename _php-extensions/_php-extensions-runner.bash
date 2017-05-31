@@ -139,6 +139,10 @@ fi
 if [[ ${MOD_PECL_RET} == 0 ]] && [[ $(isExtensionEnabled ${MOD_NAME}) != "true" ]]; then
     if [ ${BIN_PHPENV} ]
     then
+        writeExecuted "${BIN_PHPENV} config-add ${INC_PHP_CONF_PATH}/${MOD_NAME}.ini"
+        ${BIN_PHPENV} config-add "${INC_PHP_CONF_PATH}/${MOD_NAME}.ini" &>> /dev/null || \
+            writeWarning "Could not add ${MOD_NAME}.ini to PHP config."
+
         writeExecuted "${BIN_PHPENV} conf add ${INC_PHP_CONF_PATH}/${MOD_NAME}.ini"
         ${BIN_PHPENV} conf add "${INC_PHP_CONF_PATH}/${MOD_NAME}.ini" &>> /dev/null || \
             writeWarning "Could not add ${MOD_NAME}.ini to PHP config."
