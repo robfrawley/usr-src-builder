@@ -11,7 +11,7 @@
 
 namespace SR\PhpCsFixer;
 
-use SLLH\StyleCIBridge\ConfigBridge;
+use SR\PhpCsFixer\ConfigBridge;
 use Symfony\CS\Config as SymfonyConfig;
 use Symfony\CS\Fixer\Contrib\HeaderCommentFixer;
 
@@ -21,6 +21,11 @@ class Config
      * @var string
      */
     private $autoload = '/vendor/sllh/php-cs-fixer-styleci-bridge/autoload.php';
+
+    /**
+     * @var string
+     */
+    private $location = __DIR__.'/../../../';
 
     /**
      * @var string|null
@@ -88,7 +93,7 @@ EOF;
      */
     public function setOptions(array $options)
     {
-        foreach (['linting', 'caching', 'header', 'autoload', 'project', 'author'] as $name) {
+        foreach (['linting', 'caching', 'header', 'autoload', 'project', 'author', 'location'] as $name) {
             if (null !== $value = $options[$name] ?? null) {
                 $this->{$name} = $value;
             }
@@ -162,15 +167,8 @@ EOF;
      */
     private function getConfigInstance(): SymfonyConfig
     {
-        return ConfigBridge::create();
+        require __DIR__.'/bridge.php';
+
+        return ConfigBridge::create($this->location, $this->location);
     }
-}
-
-try {
-    $config = (new Config($options ?? []))->create();
-    echo sprintf("[PHP-CS-FIXER] Created configuration object in %s\n", __FILE__);
-
-    return $config;
-} catch (\Exception $exception) {
-    echo sprintf("[PHP-CS-FIXER] %s\n", $exception->getMessage());
 }
