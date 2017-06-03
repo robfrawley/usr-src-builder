@@ -13,10 +13,7 @@ namespace SR\PhpCsFixer;
 
 use Composer\Semver\Semver;
 use Doctrine\Common\Inflector\Inflector;
-use PhpCsFixer\Config;
 use PhpCsFixer\Console\Application;
-use PhpCsFixer\Finder;
-use PhpCsFixer\FixerFactory;
 use SLLH\StyleCIBridge\StyleCI\Configuration;
 use SLLH\StyleCIFixers\Fixers;
 use Symfony\Component\Config\Definition\Processor;
@@ -24,17 +21,25 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\CS\Finder;
 use Symfony\CS\Fixer;
 use Symfony\CS\Fixer\Contrib\HeaderCommentFixer;
 use Symfony\CS\FixerInterface;
 
 /**
  * @author Sullivan Senechal <soullivaneuh@gmail.com>
+ * @author Rob Frawley 2nd <rmf@src.run>
  */
 final class ConfigBridge
 {
+    /**
+     * @var string
+     */
     const CS_FIXER_MIN_VERSION = '1.6.1';
 
+    /**
+     * @var string
+     */
     const PRESET_NONE = 'none';
 
     /**
@@ -63,103 +68,49 @@ final class ConfigBridge
     private $finderDirs;
 
     /**
-     * @param string|null       $styleCIConfigDir StyleCI config directory. Called script dir as default.
-     * @param string|array|null $finderDirs       A directory path or an array of directories for Finder. Called script dir as default.
+     * @param string $rootDirectoryPath
      */
-    public function __construct($styleCIConfigDir = null, $finderDirs = null)
+    public function __construct($rootDirectoryPath)
     {
-        if (!Semver::satisfies(
-            class_exists('Symfony\CS\Fixer') ? Fixer::VERSION : Application::VERSION, // PHP-CS-Fixer 1.x BC
-            sprintf('>=%s', self::CS_FIXER_MIN_VERSION)
-        )) {
+        if (!Semver::satisfies(class_exists('Symfony\CS\Fixer') ? Fixer::VERSION : Application::VERSION, sprintf('>=%s', self::CS_FIXER_MIN_VERSION))) {
             throw new \RuntimeException(sprintf(
-                'PHP-CS-Fixer v%s is not supported, please upgrade to v%s or higher.',
-                Fixer::VERSION,
-                self::CS_FIXER_MIN_VERSION
+                'PHP-CS-Fixer v%s is not supported, please upgrade to v%s or higher.', Fixer::VERSION, self::CS_FIXER_MIN_VERSION
             ));
         }
 
-        // Guess config files path if not specified.
-        // getcwd function is not enough. See: https://github.com/Soullivaneuh/php-cs-fixer-styleci-bridge/issues/46
-        if (null === $styleCIConfigDir || null === $finderDirs) {
-            $dbt = version_compare(PHP_VERSION, '5.4.0', '>=') ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2) : debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-
-            // Static call
-            if (isset($dbt[1]['class']) && 'SLLH\StyleCIBridge\ConfigBridge' === $dbt[1]['class'] && 'create' === $dbt[1]['function']) {
-                $configsPath = dirname($dbt[1]['file']);
-            } elseif (isset($dbt[0]['class']) && 'SLLH\StyleCIBridge\ConfigBridge' === $dbt[0]['class'] && '__construct' === $dbt[0]['function']) { // Manual instance
-                $configsPath = dirname($dbt[0]['file']);
-            } else { // If no case found, fallback to not reliable getcwd method.
-                $configsPath = getcwd();
-            }
-
-            $this->styleCIConfigDir = $styleCIConfigDir ?: $configsPath;
-            $this->finderDirs = $finderDirs ?: $configsPath;
-        } else {
-            $this->styleCIConfigDir = $styleCIConfigDir;
-            $this->finderDirs = $finderDirs;
-        }
+        $this->styleCIConfigDir = $rootDirectoryPath;
+        $this->finderDirs = $rootDirectoryPath;
 
         $this->output = new ConsoleOutput();
         $this->output->getFormatter()->setStyle('warning', new OutputFormatterStyle('black', 'yellow'));
-        // PHP-CS-Fixer 1.x BC
-        if (class_exists('PhpCsFixer\FixerFactory')) { // PHP-CS-Fixer 2.x only
-            $this->fixerFactory = FixerFactory::create();
-            $this->fixerFactory->registerBuiltInFixers();
-        }
 
         $this->parseStyleCIConfig();
     }
 
     /**
-     * @param string       $styleCIConfigDir
-     * @param string|array $finderDirs       A directory path or an array of directories for Finder
+     * @param string $rootDirectoryPath
      *
-     * @return Config|\Symfony\CS\Config\Config
+     * @return \Symfony\CS\Config
      */
-    public static function create($styleCIConfigDir = null, $finderDirs = null)
+    public static function create($rootDirectoryPath): \Symfony\CS\Config
     {
-        $bridge = new static($styleCIConfigDir, $finderDirs);
+        $bridge = new static($rootDirectoryPath);
 
-        // PHP-CS-Fixer 1.x BC
-        if (class_exists('\Symfony\CS\Config\Config')) {
-            $config = \Symfony\CS\Config\Config::create();
-        } else {
-            $config = Config::create();
-        }
+        $config = \Symfony\CS\Config::create();
 
-        // PHP-CS-Fixer 1.x BC
-        if (method_exists($config, 'level')) {
-            $config->level(FixerInterface::NONE_LEVEL);
-        }
+        $config->level(FixerInterface::NONE_LEVEL);
+        $config->fixers($bridge->getFixers());
 
-        if (method_exists($config, 'setRules')) {
-            $config->setRules($bridge->getRules());
-        } else { // PHP-CS-Fixer 1.x BC
-            $config->fixers($bridge->getFixers());
-        }
-
-        // PHP-CS-Fixer 1.x BC
-        if (method_exists($config, 'setRiskyAllowed')) {
-            $config->setRiskyAllowed($bridge->getRisky());
-        }
-
-        return $config
-            ->finder($bridge->getFinder())
-            ;
+        return $config->finder($bridge->getFinder());
     }
 
     /**
-     * @return Finder|\Symfony\CS\Finder\DefaultFinder
+     * @return \Symfony\CS\Finder
      */
-    public function getFinder()
+    public function getFinder(): Finder
     {
-        // PHP-CS-Fixer 1.x BC
-        if (class_exists('\Symfony\CS\Finder\DefaultFinder')) {
-            $finder = \Symfony\CS\Finder\DefaultFinder::create()->in($this->finderDirs);
-        } else {
-            $finder = Finder::create()->in($this->finderDirs);
-        }
+        $finder = \Symfony\CS\Finder::create()->in($this->finderDirs);
+
         if (isset($this->styleCIConfig['finder'])) {
             $finderConfig = $this->styleCIConfig['finder'];
             foreach ($finderConfig as $key => $values) {
@@ -184,7 +135,7 @@ final class ConfigBridge
     /**
      * @return string[]
      */
-    public function getFixers()
+    public function getFixers(): array
     {
         $presetFixers = $this->resolveAliases($this->getPresetFixers());
         $enabledFixers = $this->resolveAliases($this->styleCIConfig['enabled']);
@@ -198,7 +149,6 @@ final class ConfigBridge
             array_diff($presetFixers, $disabledFixers) // Remove disabled fixers from preset
         );
 
-        // PHP-CS-Fixer 1.x BC
         if (method_exists('Symfony\CS\Fixer\Contrib\HeaderCommentFixer', 'getHeader') && HeaderCommentFixer::getHeader()) {
             array_push($fixers, 'header_comment');
         }
@@ -211,7 +161,7 @@ final class ConfigBridge
      *
      * @return array
      */
-    public function getRules()
+    public function getRules(): array
     {
         $fixers = $this->getFixers();
 
@@ -238,7 +188,7 @@ final class ConfigBridge
     /**
      * @return bool
      */
-    public function getRisky()
+    public function getRisky(): bool
     {
         return $this->styleCIConfig['risky'];
     }
@@ -246,7 +196,7 @@ final class ConfigBridge
     /**
      * @return string[]
      */
-    private function getPresetFixers()
+    private function getPresetFixers(): array
     {
         if (static::PRESET_NONE === $this->styleCIConfig['preset']) {
             return array();
@@ -264,7 +214,7 @@ final class ConfigBridge
      *
      * @return string[]
      */
-    private function resolveAliases(array $fixers)
+    private function resolveAliases(array $fixers): array
     {
         foreach (Fixers::$aliases as $alias => $name) {
             if (in_array($alias, $fixers, true) && !in_array($name, $fixers, true) && $this->isFixerAvailable($name)) {
@@ -283,7 +233,7 @@ final class ConfigBridge
      *
      * @return bool
      */
-    private function isFixerAvailable($name)
+    private function isFixerAvailable($name): bool
     {
         // PHP-CS-Fixer 1.x BC
         if (null === $this->fixerFactory) {

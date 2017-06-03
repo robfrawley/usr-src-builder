@@ -25,7 +25,7 @@ class Config
     /**
      * @var string
      */
-    private $location = __DIR__.'/../../../';
+    private $location;
 
     /**
      * @var string|null
@@ -85,6 +85,8 @@ EOF;
         $bridge->setUsingCache($this->caching);
         $bridge->setUsingLinter($this->linting);
 
+        $this->writeLine('Returning configured "%s" instance.', SymfonyConfig::class);
+
         return $bridge;
     }
 
@@ -93,10 +95,16 @@ EOF;
      */
     public function setOptions(array $options)
     {
+        $this->writeLine('Using configuration options: %s', json_encode($options));
+
         foreach (['linting', 'caching', 'header', 'autoload', 'project', 'author', 'location'] as $name) {
             if (null !== $value = $options[$name] ?? null) {
                 $this->{$name} = $value;
             }
+        }
+
+        if (null === $this->location) {
+            throw new \InvalidArgumentException('You must set the "location" configuration option.');
         }
     }
 
@@ -112,6 +120,8 @@ EOF;
 
         for (; $i < 100; $i++) {
             if (file_exists($filePath = $autoloadRootPath.$this->autoload)) {
+                $this->writeLine('Using autoloader "%s".', $filePath);
+
                 return $filePath;
             }
 
@@ -132,6 +142,10 @@ EOF;
      */
     private function setHeaderCommentString(): self
     {
+        if (true === $this->header) {
+            $this->generateHeaderReplacementArguments();
+        }
+
         if (null === $this->header) {
             $this->generateHeaderCommentString();
         }
@@ -150,9 +164,35 @@ EOF;
     /**
      * @return self
      */
+    private function generateHeaderReplacementArguments(): self
+    {
+        $this->writeLine('Using auto generating header replacement arguments.');
+
+        $package = $this->readPackageConfiguration();
+
+        $this->author = $package['pkg_copy'] ?? null;
+
+        if ($package['pkg_name']) {
+            if ($package['pkg_orgn']) {
+                $this->project = sprintf('%s/%s', $package['pkg_orgn'], $package['pkg_name']);
+            } else {
+                $this->project = $package['pkg_name'];
+            }
+        }
+
+        $this->header = null;
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
     private function generateHeaderCommentString(): self
     {
         if (null !== $this->project && null !== $this->author) {
+            $this->writeLine('Using auto generated header replacement string message.');
+
             $this->header = vsprintf($this->headerTemplate, [
                 $this->project,
                 $this->author,
@@ -163,12 +203,91 @@ EOF;
     }
 
     /**
+     * @return string
+     */
+    private function locatePackageConfigurationFile(): string
+    {
+        $possibleFileNames = ['.bldr.yml', '.bldr.yaml', '.builder.yml', '.builder.yaml', '.sr.yml', '.sr.yaml'];
+
+        foreach ($possibleFileNames as $f) {
+            $file = $this->location.DIRECTORY_SEPARATOR.$f;
+
+            if (file_exists($file) && is_readable($file)) {
+                $this->writeLine('Using package configuration "%s".', $file);
+
+                return $file;
+            }
+        }
+
+        throw new \RuntimeException(sprintf(
+            'Unable to find package configuration file in "%s" as "%s".', $this->location, implode(':', $possibleFileNames)
+        ));
+    }
+
+    /**
+     * @return array
+     */
+    private function readPackageConfiguration(): array
+    {
+        $elements = [];
+
+        foreach (file($this->locatePackageConfigurationFile()) as $line) {
+            $elements = array_merge($elements, $this->parseSimpleKeyValueYamlLine($line));
+        }
+
+        return $elements;
+    }
+
+    /**
+     * @param string $line
+     *
+     * @return array[]
+     */
+    private function parseSimpleKeyValueYamlLine(string $line): array
+    {
+        if (1 === preg_match('{^\s*(?<name>[a-z_]+)\s*:\s*"?(?<value>.+?)"?$}i', $line, $matches)) {
+            if ($matches['value'] === '~') {
+                $matches['value'] = null;
+            }
+
+            return [$matches['name'] => $matches['value']];
+        }
+
+        throw new \RuntimeException(sprintf('Unable to parse malformed YAML line "%s"', $line));
+    }
+
+    /**
      * @return SymfonyConfig
      */
     private function getConfigInstance(): SymfonyConfig
     {
-        require __DIR__.'/bridge.php';
+        $this->requireDependency('bridge');
 
-        return ConfigBridge::create($this->location, $this->location);
+        return ConfigBridge::create($this->location);
+    }
+
+    /**
+     * @param string $what
+     *
+     * @return self
+     */
+    private function requireDependency(string $what): self
+    {
+        require sprintf('%s/%s.php', __DIR__, $what);
+
+        return $this;
+    }
+
+    /**
+     * @param string $line
+     * @param array  $replacements
+     *
+     * @return self
+     */
+    private function writeLine(string $line, ...$replacements): self
+    {
+        echo sprintf("[%s] %s\n", __CLASS__, vsprintf($line, $replacements));
+
+        return $this;
     }
 }
