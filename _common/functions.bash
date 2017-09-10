@@ -426,7 +426,7 @@ function doRunCmdInline()
     writeAndExecute "${cmd_bin}" || cmd_ret=$?
 
     if [[ ${cmd_ret} -ne 0 ]]; then
-        writeSmallWarning "$(printf 'Command execution failed with status code %d...' ${cmd_ret})"
+        writeSmallWarning "$(printf 'Command execution failed with return code %d...' ${cmd_ret})"
     fi
 
     return ${cmd_ret}
@@ -449,7 +449,7 @@ function doRunCmdExternal()
     doRunCmdUsingTemporaryFile "${exe}" "${command_content[@]}" || command_ret=$?
 
     if [[ ${command_ret} -ne 0 ]]; then
-        writeSmallWarning "$(printf 'Executable returned non-zero %d status code: %s' ${command_ret} "${exe}")"
+        writeSmallWarning "$(printf 'Command execution failed with return code %d...' ${command_ret})"
     fi
 
     return ${command_ret}
@@ -500,7 +500,7 @@ function doRunSqlStatement()
     doRunCmdUsingTemporaryFile "${command_bin}" "${command_content[@]}" || command_ret=$?
 
     if [[ ${command_ret} -ne 0 ]]; then
-        writeSmallWarning "$(printf 'Sql statement execution returned non-zero %d status code: %s' ${command_ret} "${command_bin}")"
+        writeSmallWarning "$(printf 'Sql statement execution failed with return code %d...' ${command_ret})"
     fi
 
     return ${command_ret}
