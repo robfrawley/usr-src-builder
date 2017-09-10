@@ -9,19 +9,18 @@
 # file distributed with this source code.
 ##
 
-export RT_COMMANDS_RET=0
-export RT_COMMANDS_ACT=()
-export RT_COMMANDS_ACT_FB=()
+export RUN_ACTION_RETURN_GLOB=0
+export RUN_ACTION_INSTRUCTIONS_CMD=()
+export RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
 
-writeEnvironmentEnter "${RT_MODE_DESC}"
+writeEnvironmentEnter "${BLD_MODE_DESC}"
 
-for e in "${RT_INCS[@]}"
+for e in "${BLD_INCS[@]}"
 do
-	writeSourcedFile "${RT_PATH}/_php-extensions-runner.bash"
+	writeSourcedFile "${BLD_PATH}/_php-extensions-runner.bash"
 	export MOD_NAME=${e}
-	. "${RT_PATH}/_php-extensions-runner.bash"
+	. "${BLD_PATH}/_php-extensions-runner.bash"
 done
 
-writeEnvironmentExit "${RT_MODE_DESC}"
+writeEnvironmentExit "${BLD_MODE_DESC}"
 
-# EOF #

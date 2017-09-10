@@ -216,56 +216,54 @@ function writeSequence()
 
 function writeFailedLogOutput()
 {
-    local f="${1}"
-    local t="${2}"
-    local os=" :: BUILD LOG OUTPUT [ ${t} ] |"
-    local len="$((($(echo ${os} | wc -m) + 10)))"
+    local file="${1}"
+    local task="${2}"
+    local size=$(wc -l < "${file}")
 
     if [[ "${B_QUIET}" -eq 1 ]]; then
         colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
-        writeBlockSmall "##" "CRIT" "Failure in ${t} task"
+        writeBlockLarge "##" "CRIT" "Failed command log output: ${file}"
+
         return
     fi
 
-    writeWarning "The previous command(s) errored. Any available log" \
-        "output will be dumped for review."
+    if [[ ! -f "${file}" ]] || [[ ! $size -gt 0 ]]; then
+        writeWarning "Failed command did not produce any output logs to display!"
+        removeFile "${file}"
 
-    sleep 2
-
-    echo -en "  " && \
-        echo -en "${CLR_L_YELLOW}+" &&\
-        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
-        echo -en "${CLR_L_YELLOW}+\n" &&\
-        echo -en "  | ${CLR_B_YELLOW}START DUMP${CLR_L_YELLOW}${os}" && \
-        writeNewLine && \
-        echo -en "  +" && \
-        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
-        echo -en "${CLR_L_YELLOW}+${CLR_RST}" &&\
-        writeNewLine
-
-    if [[ -f ${f} ]]
-    then
-        cat ${f} | sed '/^\s*$/d'
-    else
-        echo -en "  ${CLR_B_RED}ERROR --- ${CLR_L_RED}No log output ot log file \"${f}\" is not present.${CLR_RST}" && \
-            writeNewLine
+        return
     fi
 
-    local len="$((($(echo ${os} | wc -m) + 8)))"
-    echo -en "  " && \
-        echo -en "${CLR_L_YELLOW}+" &&\
-        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
-        echo -en "${CLR_L_YELLOW}+\n" &&\
-        echo -en "  ${CLR_L_YELLOW}|${CLR_B_YELLOW} END DUMP${CLR_L_YELLOW}${os}" && \
-        writeNewLine && \
-        echo -en "  +" && \
-        writeSequence ${len} "-" "${CLR_L_YELLOW}" && \
-        echo -en "${CLR_L_YELLOW}+${CLR_RST}" &&\
-        writeNewLine
+    lines_pluralized="lines"
+    if [[ ${size} == 1 ]]; then
+        lines_pluralized="line"
+    fi
 
-    rm -fr ${f}
+    writeSmallWarning "$(printf 'Command output logged %d %s to file: %s' ${size} ${lines_pluralized} "${file}")"
 
-    sleep 2
+    echo -en "  ${CLR_L_YELLOW}++-- ${CLR_B_YELLOW}LOG DUMP START${CLR_L_YELLOW} [ ${task} ] --++${CLR_RST}" && writeNewLine && writeNewLine
+    cat ${file} | sed '/^\s*$/d'
+    writeNewLine && echo -en "  ${CLR_L_YELLOW}++-- ${CLR_B_YELLOW}LOG DUMP END  ${CLR_L_YELLOW} [ ${task} ] --++${CLR_RST}" && writeNewLine
+
+    removeFile "${file}"
+}
+
+function removeFile()
+{
+    local file="${1}"
+    local allow_preserve="${2:-true}"
+
+    if [[ ! ${file} ]]; then
+        return
+    fi
+
+    if [[ ${allow_preserve} == "true" ]] && [[ "${BLD_TMP_PRESERVE}" == "true" ]]; then
+        writeDebug "Preserving temporary file: ${file}"
+        return
+    fi
+
+    writeDebug "Removing temporary file: ${file}"
+    rm -fr "${file}"
 }
 
 function appendLogBufferLines()
@@ -316,18 +314,20 @@ function writeEnter()
 
 function writeEnvironmentEnter()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        return
+    if [[ "${B_VERBOSE}" -eq 1 ]]; then
+        colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+        writeBlockSmall ">>" "INIT" "$(printf '[%s]' "${1,,}")"
+        colorReset
     fi
-
-    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
-    writeBlockSmall ">>" "INIT" "$(printf 'Running "%s" operations' "${1,,}")"
-    colorReset
 }
 
 function writeSectionEnter()
 {
-    colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
+    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_B_WHITE}" "${CLR_B_WHITE}" "${CLR_B_WHITE}"
     writeBlockSmall "->" "INIT" "${@}"
     colorReset
 }
@@ -345,18 +345,22 @@ function writeExit()
 
 function writeEnvironmentExit()
 {
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+    if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
     colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
-    writeBlockSmall "<<" "DONE" "$(printf 'Finished "%s" operations' "${1,,}")"
+    writeBlockSmall "<<" "DONE" "$(printf '[%s]' "${1,,}")"
     colorReset
 }
 
 function writeSectionExit()
 {
-    colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
+    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_B_WHITE}" "${CLR_B_WHITE}" "${CLR_B_WHITE}"
     writeBlockSmall "<-" "DONE" "${@}"
     colorReset
 }
@@ -394,11 +398,167 @@ function writeExecuted()
     colorReset
 }
 
+function writeAndExecute()
+{
+    local command_bin="${1}"
+    local write_action="${2:-true}"
+    local command_ret=0
+
+    if [[ "${write_action}" == "true" ]]; then
+        writeExecuted "${command_bin}"
+    fi
+
+    ${command_bin} &>> ${RUN_ACTION_SOURCE_LOGS} || command_ret=$?
+
+    return ${command_ret}
+}
+
+function doRunCmdInline()
+{
+    local cmd_bin="${1}"
+    local cmd_ret=0
+
+    if [[ "${cmd}" == "" ]]; then
+        writeWarning "$(printf 'No command defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT} ${ACTION_CONTEXT} ${ACTION_TYPE} "${BLD_MODE_DESC,,}" "${RUN_ACTION_SOURCE_INST:-null}")"
+        return
+    fi
+
+    writeAndExecute "${cmd_bin}" || cmd_ret=$?
+
+    if [[ ${cmd_ret} -ne 0 ]]; then
+        writeSmallWarning "$(printf 'Command returned non-zero %d status code: %s' ${cmd_ret} "${cmd_bin}")"
+    fi
+
+    return ${cmd_ret}
+}
+
+function doRunCmdExternal()
+{
+    local exe="${1}"
+
+    if [[ "${exe}" == "" ]]; then
+        writeWarning "$(printf 'No executable defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT:-x} ${ACTION_CONTEXT:-x} ${ACTION_TYPE:-x} "${BLD_MODE_DESC,,:-x}" "${RUN_ACTION_SOURCE_INST:-x}")"
+        return
+    fi
+
+    local command_ret=0
+    local command_content=(
+        "${exe}"
+    )
+
+    doRunCmdUsingTemporaryFile "${exe}" "${command_content[@]}" || command_ret=$?
+    
+    if [[ ${command_ret} -ne 0 ]]; then
+        writeSmallWarning "$(printf 'Executable returned non-zero %d status code: %s' ${command_ret} "${exe}")"
+    fi
+
+    return ${command_ret}
+}
+
+function doRunSqlStatement()
+{
+    local statement="${1}"
+    local db_user="${2:-x}"
+    local db_pass="${3:-x}"
+    local db_user="${4:-x}"
+
+    if [[ "${statement}" == "" ]]; then
+        writeWarning "$(printf 'No sql statement defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT:-x} ${ACTION_CONTEXT:-x} ${ACTION_TYPE:-x} "${BLD_MODE_DESC,,:-x}" "${RUN_ACTION_SOURCE_INST:-x}")"
+        return
+    fi
+
+    if [[ "${db_user}" == "x" ]]; then
+        db_user="${DB_USER}"
+    fi
+
+    if [[ "${db_pass}" == "x" ]]; then
+        db_pass="${DB_PASS}"
+    fi
+
+    if [[ "${db_name}" == "x" ]]; then
+        db_name="${DB_NAME}"
+    fi
+
+    local command_ret=0
+    local command_bin="$(which mysql) -u${DB_USER}"
+
+    if [[ "${DB_PASS}" != "" ]]; then
+        command_bin="${command_bin} -p\"${DB_PASS}\""
+    fi
+
+    if [[ "${DB_NAME}" != "" ]]; then
+        command_bin="${command_bin} ${DB_NAME}"
+    fi
+
+    command_bin="${command_bin} -e \"${statement}\""
+
+    local command_ret=0
+    local command_content=(
+        "${command_bin}"
+    )
+
+    doRunCmdUsingTemporaryFile "${command_bin}" "${command_content[@]}" || command_ret=$?
+    
+    if [[ ${command_ret} -ne 0 ]]; then
+        writeSmallWarning "$(printf 'Sql statement execution returned non-zero %d status code: %s' ${command_ret} "${command_bin}")"
+    fi
+
+    return ${command_ret}
+}
+
+function doRunCmdUsingTemporaryFile()
+{
+    local whats="${1}"
+    shift
+    local lines=("${@}")
+    local command_ret=0
+    local command_md5="$(echo "${lines[@]}" | md5sum | grep -oE '[a-z0-9]+')"
+    local command_tmp="/tmp/bldr-run-${command_md5}.bash"
+    local command_bin="$(which bash) ${command_tmp}"
+
+    echo "#!/bin/sh" > "${command_tmp}"
+    echo "" >> "${command_tmp}"
+    echo "#" >> "${command_tmp}"
+    echo "# builder temporary script" >> "${command_tmp}"
+    echo "# $(printf '%s:%s:%s' ${ACTION_CONTEXT:-x} ${ACTION_TYPE:-x} "${BLD_MODE_DESC,,}")" >> "${command_tmp}"
+    echo "#" >> "${command_tmp}"
+    echo "" >> "${command_tmp}"
+    echo "cd ${BLDR_PATH_NAME}/.. || exit \$?" >> "${command_tmp}"
+    for l in "${lines[@]}"; do
+        echo "${l} || exit \$?" >> "${command_tmp}"
+    done
+
+    writeDebug "Using temporary file to run action: ${command_tmp}"
+
+    writeExecuted "${whats}"
+    writeAndExecute "${command_bin}" "false" || command_ret=$?
+
+    removeFile "${command_tmp}"
+
+    return ${command_ret}
+}
+
 function writeSourcedFile()
 {
     colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
     writeBlockSmall "--" "FILE" "${@}"
     colorReset
+}
+
+function writeActionSourcedFile()
+{
+    colorAssign "${CLR_YELLOW}" "${CLR_B_YELLOW}" "${CLR_B_WHITE}"
+    writeBlockSmall "--" "FILE" "${@}"
+    colorReset
+}
+
+function writeDebugSourcedFile()
+{
+    if [[ "${B_VERY_VERBOSE}" -eq 1 ]]; then
+        colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
+        writeBlockSmall "--" "FILE" "${@}"
+        colorReset
+    fi
 }
 
 function writeInfo()
@@ -409,6 +569,17 @@ function writeInfo()
 
     colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
     writeBlockSmall "--" "INFO" "${@}"
+    colorReset
+}
+
+function writeDebug()
+{
+    if [[ "${B_DEBUG}" -ne 1 ]]; then
+        return
+    fi
+
+    colorAssign "${CLR_L_WHITE}" "${CLR_B_WHITE}"
+    writeBlockSmall "<>" "DEBUG" "${@}"
     colorReset
 }
 
@@ -429,32 +600,38 @@ function writeWarning()
     colorReset
 }
 
+function writeSmallWarning()
+{
+    local state_b_verbose=${B_VERBOSE}
+
+    B_VERBOSE=0
+    writeWarning "$@"
+    B_VERBOSE=${state_b_verbose}
+}
+
 function writeError()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
-        return
+    if [[ "${B_VERY_QUIET}" -ne 1 ]]; then
+        colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
+        writeBlockLarge "##" "CRIT" "${@}"
+        colorReset
     fi
 
-    colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
-    writeBlockLarge "##" "CRIT" "${@}"
-    colorReset
     exit -1
 }
 
 function writeComplete()
 {
-    if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
-        return
+    if [[ "${B_DEBUG}" -eq 1 ]]; then
+        colorAssign "${CLR_L_WHITE}" "${CLR_L_WHITE}" "${CLR_L_WHITE}"
+        writeBlock "--" "EXITING" "${@}"
+        colorReset
     fi
-
-    colorAssign "${CLR_L_WHITE}" "${CLR_L_WHITE}" "${CLR_L_WHITE}"
-    writeBlockLarge "--" "EXITING" "${@}"
-    colorReset
 }
 
 function writeDefinitionListing()
 {
-    if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
+    if [[ "${B_DEBUG}" -ne 1 ]]; then
         return
     fi
 
@@ -856,5 +1033,4 @@ function getYesOrNoForCompare()
     fi
 }
 
-# EOF #
 

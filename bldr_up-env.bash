@@ -11,45 +11,44 @@
 
 type writeLines &>> /dev/null || exit -1
 
-export RT_MODE="env make"
-export RT_MODE_DESC="Environment Make"
-export RT_MODE_APPEND=false
-export RT_INCS=($(commaToSpaceSeparated ${scr_pkg_env_make}))
-export RT_PATH=${INC_ENV_MAKE_PATH}
+export BLD_MODE="env make"
+export BLD_MODE_DESC="Environment Make"
+export BLD_MODE_APPEND=false
+export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_env_make}))
+export BLD_PATH=${INC_ENV_MAKE_PATH}
 
-writeSourcedFile "${RT_PATH}/_env-build.bash"
-. "${RT_PATH}/_env-build.bash"
+writeDebugSourcedFile "${BLD_PATH}/_env-build.bash"
+. "${BLD_PATH}/_env-build.bash"
 
-export RT_MODE="env prep"
-export RT_MODE_DESC="Environment Prepare"
-export RT_MODE_APPEND=false
-export RT_INCS=($(commaToSpaceSeparated ${scr_pkg_env_prep}))
-export RT_PATH=${INC_ENV_PREP_PATH}
+export BLD_MODE="env prep"
+export BLD_MODE_DESC="Environment Prepare"
+export BLD_MODE_APPEND=false
+export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_env_prep}))
+export BLD_PATH=${INC_ENV_PREP_PATH}
 
-writeSourcedFile "${RT_PATH}/_env-prepare.bash"
-. "${RT_PATH}/_env-prepare.bash"
+writeDebugSourcedFile "${BLD_PATH}/_env-prepare.bash"
+. "${BLD_PATH}/_env-prepare.bash"
 
-export RT_MODE="use"
-export RT_MODE_DESC="PHP Extension Install"
-export RT_MODE_APPEND=false
-export RT_INCS=($(commaToSpaceSeparated ${scr_pkg_php_exts}))
-export RT_PATH=${INC_PHP_EXTS_PATH}
+export BLD_MODE="use"
+export BLD_MODE_DESC="PHP Extension Install"
+export BLD_MODE_APPEND=false
+export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_php_exts}))
+export BLD_PATH=${INC_PHP_EXTS_PATH}
 
-writeSourcedFile "${RT_PATH}/_php-extensions.bash"
-. "${RT_PATH}/_php-extensions.bash"
+writeDebugSourcedFile "${BLD_PATH}/_php-extensions.bash"
+. "${BLD_PATH}/_php-extensions.bash"
 
 if [ ${BIN_PHPENV} ]
 then
-    export RT_MODE="inc"
-    export RT_MODE_DESC="PHP INI Config"
-    export RT_MODE_APPEND=false
-    export RT_INCS=($(commaToSpaceSeparated ${scr_pkg_php_conf}))
-    export RT_PATH=${INC_PHP_CONF_PATH}
+    export BLD_MODE="inc"
+    export BLD_MODE_DESC="PHP INI Config"
+    export BLD_MODE_APPEND=false
+    export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_php_conf}))
+    export BLD_PATH=${INC_PHP_CONF_PATH}
 
-    writeSourcedFile "${RT_PATH}/_php-configuration.bash"
-    . "${RT_PATH}/_php-configuration.bash"
+    writeDebugSourcedFile "${BLD_PATH}/_php-configuration.bash"
+    . "${BLD_PATH}/_php-configuration.bash"
 else
 	writeWarning "Cannot add/setup configuration INI outside PHPENV environments."
 fi
 
-# EOF #

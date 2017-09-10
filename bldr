@@ -35,6 +35,7 @@ export B_QUIET=0
 export B_VERY_QUIET=0
 export B_VERBOSE=0
 export B_VERY_VERBOSE=0
+export B_DEBUG=0
 
 function outputError()
 {
@@ -136,9 +137,14 @@ while getopts ":hvdVqb:" opt; do
                 exit 255
             fi
 
+            if [[ ${B_VERY_VERBOSE} -eq 1 ]]; then
+                export B_DEBUG=1
+            fi
+
             if [[ ${B_VERBOSE} -eq 1 ]]; then
                 export B_VERY_VERBOSE=1
             fi
+
             export B_VERBOSE=1
         ;;
 
@@ -238,7 +244,7 @@ for context in ${ACTION_CONTEXT[@]}; do
     fi
 
     writeSectionEnter "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
-    writeSourcedFile   "${ACTION_FILE_INCLUDE}"
+    writeDebugSourcedFile   "${ACTION_FILE_INCLUDE}"
     . ${ACTION_FILE_INCLUDE}
     writeSectionExit  "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
 done
@@ -247,4 +253,3 @@ writeComplete "All operations for \"${ACTION}\" routine completed without error.
 
 exit 0
 
-# EOF #

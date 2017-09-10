@@ -9,20 +9,19 @@
 # file distributed with this source code.
 ##
 
-export RT_COMMANDS_RET=0
-export RT_COMMANDS_ACT=()
-export RT_COMMANDS_ACT_FB=()
-export RT_COMMANDS_INC=false
+export RUN_ACTION_RETURN_GLOB=0
+export RUN_ACTION_INSTRUCTIONS_CMD=()
+export RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
+export BLD_COMMANDS_INC=false
 
-for e in "${RT_INCS[@]}"
+for e in "${BLD_INCS[@]}"
 do
-    RT_COMMANDS_ACT+=("${BIN_PHPENV} conf add ${RT_PATH}/${e}.ini")
-    RT_COMMANDS_ACT+=("${BIN_PHPENV} conf enable ${e}")
+    RUN_ACTION_INSTRUCTIONS_CMD+=("${BIN_PHPENV} conf add ${BLD_PATH}/${e}.ini")
+    RUN_ACTION_INSTRUCTIONS_CMD+=("${BIN_PHPENV} conf enable ${e}")
 done
 
-RT_COMMANDS_ACT+=("${BIN_PHPENV} rehash")
+RUN_ACTION_INSTRUCTIONS_CMD+=("${BIN_PHPENV} rehash")
 
-writeSourcedFile "${RT_PATH}/_php-configuration-runner.bash"
-. "${RT_PATH}/_php-configuration-runner.bash"
+writeDebugSourcedFile "${BLD_PATH}/_php-configuration-runner.bash"
+. "${BLD_PATH}/_php-configuration-runner.bash"
 
-# EOF #

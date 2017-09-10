@@ -9,20 +9,24 @@
 # file distributed with this source code.
 ##
 
-if [ -z ${CLI_VERY_QUIET+x} ]; then
-    export CLI_VERY_QUIET=0
+if [ -z ${B_VERY_QUIET+x} ]; then
+    export B_VERY_QUIET=0
 fi
 
-if [ -z ${CLI_QUIET+x} ]; then
-    export CLI_QUIET=0
+if [ -z ${B_QUIET+x} ]; then
+    export B_QUIET=0
 fi
 
-if [ -z ${CLI_VERBOSE+x} ]; then
-    export CLI_VERBOSE=0
+if [ -z ${B_VERBOSE+x} ]; then
+    export B_VERBOSE=0
 fi
 
-if [ -z ${CLI_VERY_VERBOSE+x} ]; then
-    export CLI_VERY_VERBOSE=0
+if [ -z ${B_VERY_VERBOSE+x} ]; then
+    export B_VERY_VERBOSE=0
+fi
+
+if [ -z ${B_DEBUG+x} ]; then
+    export B_DEBUG=0
 fi
 
 export CMD_PRE=""
@@ -97,17 +101,20 @@ export INC_APP_PREP_FILE="app-prep_"
 export INC_APP_POST_PATH="$(readlink -m ${BLDR_PATH_NAME}/_app-cleanup/)"
 export INC_APP_POST_FILE="app-post_"
 
-export RT_MODE_APPEND=false
-export RT_MODE=""
-export RT_MODE_DESC=false
-export RT_INCS=()
-export RT_PATH=""
-export RT_COMMANDS_RET=0
-export RT_COMMANDS_ACT=()
-export RT_COMMANDS_ACT_FB=()
-export RT_COMMANDS_INC=true
+export BLD_MODE_APPEND=false
+export BLD_MODE=""
+export BLD_MODE_DESC=false
+export BLD_INCS=()
+export BLD_PATH=""
+export RUN_ACTION_RETURN_GLOB=0
+export RUN_ACTION_INSTRUCTIONS_CMD=()
+export RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
+export RUN_ACTION_INSTRUCTIONS_SQL=()
+export RUN_ACTION_INSTRUCTIONS_EXE=()
+export BLD_COMMANDS_INC=true
+export BLD_TMP_PRESERVE=false
 
-export RT_ENV_MAKE_VER_IMAGE_MAGIK="6.9.3-2"
+export BLD_ENV_MAKE_VER_IMAGE_MAGIK="6.9.3-2"
 
 if [ ${PKG_REQ_VARIABLE}} == "~" ]
 then
@@ -183,4 +190,18 @@ export OUT_MAX_CHAR=100
 export OUT_SPACE_F=1
 export OUT_SPACE_N=1
 
-# EOF #
+if [[ -z ${DB_USER+x} ]]; then
+	DB_USER="root"
+fi
+
+if [[ -z ${DB_PASS+x} ]]; then
+	DB_PASS=""
+fi
+
+if [[ -z ${DB_NAME+x} ]]; then
+	DB_NAME=""
+fi
+
+export DB_USER
+export DB_PASS
+export DB_NAME

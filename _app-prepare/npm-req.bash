@@ -9,8 +9,7 @@
 # file distributed with this source code.
 ##
 
-RT_COMMANDS_ACT=(
+RUN_ACTION_INSTRUCTIONS_CMD=(
 	"npm install"
 )
 
-# EOF #

@@ -84,4 +84,3 @@ else
     export APP_MAKE_CLI="$(readlink -m ${DIR_CWD}/${scr_pkg_app_path})"
 fi
 
-# EOF #

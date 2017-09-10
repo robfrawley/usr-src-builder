@@ -9,8 +9,9 @@
 # file distributed with this source code.
 ##
 
-RT_COMMANDS_ACT=(
-	"npm install -g npm@4"
+RUN_ACTION_INSTRUCTIONS_SQL=(
+	"set global innodb_large_prefix = true"
+	"set global innodb_file_per_table = true"
+	"set global innodb_file_format = 'barracuda'"
 )
 
-# EOF #

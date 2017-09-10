@@ -9,9 +9,8 @@
 # file distributed with this source code.
 ##
 
-RT_COMMANDS_ACT=(
+RUN_ACTION_INSTRUCTIONS_CMD=(
 	"rm -f app/config/parameters.yml"
     "cp app/config/parameters.yml.test app/config/parameters.yml"
 )
 
-# EOF #

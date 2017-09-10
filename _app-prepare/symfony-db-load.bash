@@ -9,8 +9,7 @@
 # file distributed with this source code.
 ##
 
-RT_COMMANDS_ACT=(
+RUN_ACTION_INSTRUCTIONS_CMD=(
     "${APP_MAKE_CLI} doctrine:fixtures:load -n"
 )
 
-# EOF #

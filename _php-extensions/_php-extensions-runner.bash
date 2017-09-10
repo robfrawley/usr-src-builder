@@ -41,7 +41,7 @@ MOD_PECL_CD=false
 MOD_PECL_RET=0
 MOD_RESULT=0
 
-writeSourcedFile "${MOD_SOURCE_CONFIG}"
+writeActionSourcedFile "${MOD_SOURCE_CONFIG}"
 
 . ${MOD_SOURCE_CONFIG}
 
@@ -169,4 +169,3 @@ else
     writeSectionExit "Install \"${MOD_NAME}\" extension."
 fi
 
-# EOF #
