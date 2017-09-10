@@ -23,8 +23,8 @@ RUN_ACTION_INSTRUCTIONS_CMD=(
 
 RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=(
     "${BIN_PHPENV} conf add ${BLD_PATH}/${RUN_ACTION_INSTRUCTIONS_PHP_INC}.ini"
-    ""
-    ""
+    "continue"
+    "continue"
 )
 
 writeDebugSourcedFile "${BLD_PATH}/_php-configuration-runner.bash"
