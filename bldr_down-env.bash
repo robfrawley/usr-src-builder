@@ -12,7 +12,7 @@
 type writeLines &>> /dev/null || exit -1
 
 export BLD_MODE="ci"
-export BLD_MODE_DESC="Enviornment Post-run"
+export BLD_MODE_DESC="environment-tear-down"
 export BLD_MODE_APPEND=false
 export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_env_post}))
 export BLD_PATH=${INC_ENV_POST_PATH}

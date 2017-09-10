@@ -17,7 +17,9 @@ if [[ ${BLD_MODE_DESC} == false ]]; then
     BLD_MODE_DESC="${BLD_MODE}"
 fi
 
-writeEnvironmentEnter "${BLD_MODE_DESC}"
+if [[ "${BLD_MODE_DESC_HIDE:-x}" != "true" ]]; then
+    writeEnvironmentEnter "${BLD_MODE_DESC}"
+fi
 
 for c in "${BLD_INCS[@]}"
 do
@@ -85,7 +87,9 @@ if [[ ${RUN_ACTION_COUNT} == 0 ]] && [[ "${B_VERBOSE}" -eq 1 ]]; then
     writeWarning "$(printf 'No commands executed for "%s:%s[%s]" context' ${ACTION_CONTEXT} ${ACTION_TYPE} "${BLD_MODE_DESC,,}")"
 fi
 
-writeEnvironmentExit "${BLD_MODE_DESC}"
+if [[ "${BLD_MODE_DESC_HIDE:-x}" != "true" ]]; then
+    writeEnvironmentExit "${BLD_MODE_DESC}"
+fi
 
 export BLD_MODE_APPEND=false
 export BLD_MODE=""
@@ -99,4 +103,4 @@ export RUN_ACTION_INSTRUCTIONS_SQL=()
 export RUN_ACTION_INSTRUCTIONS_EXE=()
 export BLD_COMMANDS_INC=true
 export RUN_ACTION_SQLS=()
-
+export BLD_MODE_DESC_HIDE=false

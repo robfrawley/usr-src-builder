@@ -9,18 +9,16 @@
 # file distributed with this source code.
 ##
 
-export RUN_ACTION_RETURN_GLOB=0
-export RUN_ACTION_INSTRUCTIONS_CMD=()
-export RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
+if [[ ${BLD_MODE_DESC} == false ]]; then
+    BLD_MODE_DESC="${BLD_MODE}"
+fi
 
 writeEnvironmentEnter "${BLD_MODE_DESC}"
 
-for e in "${BLD_INCS[@]}"
-do
-	writeSourcedFile "${BLD_PATH}/_php-extensions-runner.bash"
-	export MOD_NAME=${e}
-	. "${BLD_PATH}/_php-extensions-runner.bash"
+for e in "${BLD_INCS[@]}"; do
+    RUN_ACTION_INSTRUCTIONS_PHP_EXT="${e}"
+	writeActionSourcedFile "${BLD_PATH}/_php-extensions-add.bash" "${e}"
+    . "${BLD_PATH}/_php-extensions-add.bash"
 done
 
 writeEnvironmentExit "${BLD_MODE_DESC}"
-

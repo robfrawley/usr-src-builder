@@ -9,19 +9,22 @@
 # file distributed with this source code.
 ##
 
-export RUN_ACTION_RETURN_GLOB=0
-export RUN_ACTION_INSTRUCTIONS_CMD=()
-export RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
-export BLD_COMMANDS_INC=false
+BLD_MODE_THIS_DESC="${BLD_MODE}"
 
-for e in "${BLD_INCS[@]}"
-do
-    RUN_ACTION_INSTRUCTIONS_CMD+=("${BIN_PHPENV} conf add ${BLD_PATH}/${e}.ini")
-    RUN_ACTION_INSTRUCTIONS_CMD+=("${BIN_PHPENV} conf enable ${e}")
+if [[ ${BLD_MODE_DESC} != false ]]; then
+    BLD_MODE_THIS_DESC="${BLD_MODE_DESC}"
+fi
+
+writeEnvironmentEnter "${BLD_MODE_DESC}"
+
+for c in "${BLD_INCS[@]}"; do
+    RUN_ACTION_INSTRUCTIONS_PHP_INC="${c}"
+    writeActionSourcedFile "${BLD_PATH}/_php-configuration-add.bash" "${c}"
+    . "${BLD_PATH}/_php-configuration-add.bash"
 done
 
-RUN_ACTION_INSTRUCTIONS_CMD+=("${BIN_PHPENV} rehash")
+if [[ ${BLD_MODE_DESC} == false ]]; then
+    BLD_MODE_DESC="${BLD_MODE}"
+fi
 
-writeDebugSourcedFile "${BLD_PATH}/_php-configuration-runner.bash"
-. "${BLD_PATH}/_php-configuration-runner.bash"
-
+writeEnvironmentExit "${BLD_MODE_THIS_DESC}"

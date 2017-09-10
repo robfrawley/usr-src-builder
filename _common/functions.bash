@@ -323,7 +323,7 @@ function writeEnvironmentEnter()
 
 function writeSectionEnter()
 {
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+    if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
@@ -447,7 +447,7 @@ function doRunCmdExternal()
     )
 
     doRunCmdUsingTemporaryFile "${exe}" "${command_content[@]}" || command_ret=$?
-    
+
     if [[ ${command_ret} -ne 0 ]]; then
         writeSmallWarning "$(printf 'Executable returned non-zero %d status code: %s' ${command_ret} "${exe}")"
     fi
@@ -498,7 +498,7 @@ function doRunSqlStatement()
     )
 
     doRunCmdUsingTemporaryFile "${command_bin}" "${command_content[@]}" || command_ret=$?
-    
+
     if [[ ${command_ret} -ne 0 ]]; then
         writeSmallWarning "$(printf 'Sql statement execution returned non-zero %d status code: %s' ${command_ret} "${command_bin}")"
     fi
@@ -547,8 +547,18 @@ function writeSourcedFile()
 
 function writeActionSourcedFile()
 {
+    local file="${1}"
+    local more="${2:-x}"
+    local text=""
+
+    if [[ "${more}" == "x" ]]; then
+        text="${file}"
+    else
+        text="${file} (${more})"
+    fi
+
     colorAssign "${CLR_YELLOW}" "${CLR_B_YELLOW}" "${CLR_B_WHITE}"
-    writeBlockSmall "--" "FILE" "${@}"
+    writeBlockSmall "==" "FILE" "${text}"
     colorReset
 }
 

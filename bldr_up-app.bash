@@ -12,7 +12,7 @@
 type writeLines &>> /dev/null || exit -1
 
 export BLD_MODE="app prep"
-export BLD_MODE_DESC="Application Prepare"
+export BLD_MODE_DESC="application-prepare"
 export BLD_MODE_APPEND=false
 export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_app_prep}))
 export BLD_PATH=${INC_APP_PREP_PATH}
