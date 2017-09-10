@@ -24,7 +24,7 @@ RUN_ACTION_INSTRUCTIONS_CMD=(
 RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=(
     "${BIN_PHPENV} config-add ${BLD_PATH}/${RUN_ACTION_INSTRUCTIONS_PHP_INC}.ini"
     ""
-    "${BIN_PHPENV} rehash"
+    ""
 )
 
 writeDebugSourcedFile "${BLD_PATH}/_php-configuration-runner.bash"
