@@ -14,24 +14,24 @@ do
     RUN_ACTION_COUNT=$(((${RUN_ACTION_COUNT} + 1)))
 
     RUN_ACTION_RETURN_LAST=0
-    writeAndExecute "${cmd}" || RUN_ACTION_RETURN_LAST=1
+    doRunCmdInline "${cmd}" || RUN_ACTION_RETURN_LAST=$?
 
     if [[ ${RUN_ACTION_RETURN_LAST} == 0 ]]; then
         continue;
     fi
 
     if [[ ${RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$RUN_ACTION_INDEX]} != "" ]]; then
-        writeDebug "Attempting fallback command due to previous command failure..."
+        writeSmallWarning "Attempting fallback command due to previous failure..."
 
         RUN_ACTION_RETURN_LAST=0
-        runCommandBash "${RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$RUN_ACTION_INDEX]}" || RUN_ACTION_RETURN_LAST=1
+        doRunCmdInline "${RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$RUN_ACTION_INDEX]}" || RUN_ACTION_RETURN_LAST=$?
     fi
 
     if [[ ${RUN_ACTION_RETURN_LAST} == 0 ]]; then
         continue;
     fi
 
-    writeFailedLogOutput "${RUN_ACTION_SOURCE_LOGS}" "${BLD_MODE}:${c}"
+    writeFailedLogOutput "${RUN_ACTION_SOURCE_LOGS}" "${BLD_MODE}:${cmd}"
     writeError "Exiting due to command failures!"
 done
 

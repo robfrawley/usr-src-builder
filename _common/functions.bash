@@ -419,14 +419,14 @@ function doRunCmdInline()
     local cmd_ret=0
 
     if [[ "${cmd}" == "" ]]; then
-        writeWarning "$(printf 'No command defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT} ${ACTION_CONTEXT} ${ACTION_TYPE} "${BLD_MODE_DESC,,}" "${RUN_ACTION_SOURCE_INST:-null}")"
+        writeDebug "$(printf 'No command defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT} ${ACTION_CONTEXT} ${ACTION_TYPE} "${BLD_MODE_DESC,,}" "${RUN_ACTION_SOURCE_INST:-null}")"
         return
     fi
 
     writeAndExecute "${cmd_bin}" || cmd_ret=$?
 
     if [[ ${cmd_ret} -ne 0 ]]; then
-        writeSmallWarning "$(printf 'Command returned non-zero %d status code: %s' ${cmd_ret} "${cmd_bin}")"
+        writeSmallWarning "$(printf 'Command execution failed with status code %d...' ${cmd_ret})"
     fi
 
     return ${cmd_ret}
@@ -612,10 +612,11 @@ function writeWarning()
 
 function writeSmallWarning()
 {
+    local message="${1,,}"
     local state_b_verbose=${B_VERBOSE}
 
     B_VERBOSE=0
-    writeWarning "$@"
+    writeWarning "${message}"
     B_VERBOSE=${state_b_verbose}
 }
 
