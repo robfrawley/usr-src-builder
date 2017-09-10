@@ -468,26 +468,26 @@ function doRunSqlStatement()
     fi
 
     if [[ "${db_user}" == "x" ]]; then
-        db_user="${DB_USER}"
+        db_user="${BLD_DB_USER}"
     fi
 
     if [[ "${db_pass}" == "x" ]]; then
-        db_pass="${DB_PASS}"
+        db_pass="${BLD_DB_PASS}"
     fi
 
     if [[ "${db_name}" == "x" ]]; then
-        db_name="${DB_NAME}"
+        db_name="${BLD_DB_NAME}"
     fi
 
     local command_ret=0
-    local command_bin="$(which mysql) -u${DB_USER}"
+    local command_bin="$(which mysql) -u${BLD_DB_USER}"
 
-    if [[ "${DB_PASS}" != "" ]]; then
-        command_bin="${command_bin} -p\"${DB_PASS}\""
+    if [[ "${BLD_DB_PASS}" != "" ]]; then
+        command_bin="${command_bin} -p\"${BLD_DB_PASS}\""
     fi
 
-    if [[ "${DB_NAME}" != "" ]]; then
-        command_bin="${command_bin} ${DB_NAME}"
+    if [[ "${BLD_DB_NAME}" != "" ]]; then
+        command_bin="${command_bin} ${BLD_DB_NAME}"
     fi
 
     command_bin="${command_bin} -e \"${statement}\""

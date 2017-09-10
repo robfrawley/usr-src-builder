@@ -190,18 +190,18 @@ export OUT_MAX_CHAR=100
 export OUT_SPACE_F=1
 export OUT_SPACE_N=1
 
-if [[ -z ${DB_USER+x} ]]; then
-	DB_USER="root"
+if [[ -z ${BLD_DB_USER+x} ]]; then
+	BLD_DB_USER="root"
 fi
 
-if [[ -z ${DB_PASS+x} ]]; then
-	DB_PASS=""
+if [[ -z ${BLD_DB_PASS+x} ]]; then
+	BLD_DB_PASS=""
 fi
 
-if [[ -z ${DB_NAME+x} ]]; then
-	DB_NAME=""
+if [[ -z ${BLD_DB_NAME+x} ]]; then
+	BLD_DB_NAME=""
 fi
 
-export DB_USER
-export DB_PASS
-export DB_NAME
+export BLD_DB_USER
+export BLD_DB_PASS
+export BLD_DB_NAME
