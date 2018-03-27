@@ -10,6 +10,10 @@
 ##+
 
 RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${BIN_PHP} $(readlink -m bin/php-coveralls) -vvv -x ${COV_PATH}"
+)
+
+RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=(
     "${BIN_PHP} $(readlink -m bin/coveralls) -vvv -x ${COV_PATH}"
 )
 
