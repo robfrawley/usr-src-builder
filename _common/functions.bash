@@ -11,16 +11,16 @@
 
 function colorAssign()
 {
-    if [[ -n ${1} ]] && [[ ${1} != false ]]; then CLR_PRE="${1}"; fi
-    if [[ -n ${2} ]] && [[ ${1} != false ]]; then CLR_HDR="${2}"; fi
-    if [[ -n ${3} ]] && [[ ${1} != false ]]; then CLR_TXT="${3}"; fi
+    if [[ -n ${1} ]] && [[ ${1} != false ]]; then _CLR_PRE="${1}"; fi
+    if [[ -n ${2} ]] && [[ ${1} != false ]]; then _CLR_HDR="${2}"; fi
+    if [[ -n ${3} ]] && [[ ${1} != false ]]; then _CLR_TXT="${3}"; fi
 }
 
 function colorReset()
 {
-    CLR_TXT=""
-    CLR_PRE=""
-    CLR_HDR=""
+    _CLR_TXT=""
+    _CLR_PRE=""
+    _CLR_HDR=""
 }
 
 function writeNewLine()
@@ -30,7 +30,7 @@ function writeNewLine()
 
 function writeLines()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
@@ -42,14 +42,14 @@ function writeLines()
     local ind=true
     local i=0
 
-    if [[ ${OUT_PRE_LINE} == true ]]
+    if [[ ${_OUT_PRE_LINE} == true ]]
     then
         writePrefix "${p}"
     fi
 
     for l in ${@:-}
     do
-        tmp="${l/#$DIR_CWD/.}"
+        tmp="${l/#$_DIR_CWD/.}"
         if [[ "$(echo $tmp | wc -m)" != "$((($(echo $l | wc -m) + 1)))" ]]
         then
             l="${tmp}"
@@ -57,32 +57,32 @@ function writeLines()
 
         len=$((($(echo "${l}" | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | wc -m) + $len + 1)))
 
-        if [[ ${len} -gt ${OUT_MAX_CHAR} ]]
+        if [[ ${len} -gt ${_OUT_MAX_CHAR} ]]
         then
             len=$(echo "${l}" | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' | wc -m)
             ind=true
             writeNewLine
-            if [[ ${OUT_PRE_LINE} == true ]]
+            if [[ ${_OUT_PRE_LINE} == true ]]
             then
                 writePrefix "${p}"
             fi
         fi
 
-        if [[ ${OUT_PRE_LINE} != true ]]
+        if [[ ${_OUT_PRE_LINE} != true ]]
         then
-            OUT_PRE_LINE=true
+            _OUT_PRE_LINE=true
         fi
 
         if [[ ${i} == 0 ]]
         then
-            SEQ=${OUT_SPACE_F}
+            _SEQ=${_OUT_SPACE_F}
         else
-            SEQ=${OUT_SPACE_N}
+            _SEQ=${_OUT_SPACE_N}
         fi
 
         if [[ $len == 0 ]] || [[ $ind == true ]]
         then
-            for i in $(seq 1 ${SEQ})
+            for i in $(seq 1 ${_SEQ})
             do
                 l=" $l"
             done
@@ -91,27 +91,27 @@ function writeLines()
             len=$((($length + 1)))
         fi
 
-        echo -en "${CLR_RST}${CLR_TXT_D}${CLR_TXT}${l}${CLR_RST} "
+        echo -en "${_CLR_RST}${_CLR_TXT_D}${_CLR_TXT}${l}${_CLR_RST} "
 
         i=$(((${i} + 1)))
     done
 
-    if [[ ${OUT_NEW_LINE} == true ]]
+    if [[ ${_OUT_NEW_LINE} == true ]]
     then
         writeNewLine
-        OUT_NEW_LINE=true
+        _OUT_NEW_LINE=true
     else
-        OUT_NEW_LINE=true
+        _OUT_NEW_LINE=true
     fi
 
-    OUT_SPACE_F=1
-    OUT_SPACE_N=1
-    OUT_PRE_LINE=true
+    _OUT_SPACE_F=1
+    _OUT_SPACE_N=1
+    _OUT_PRE_LINE=true
 }
 
 function writeTitle()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
@@ -122,9 +122,9 @@ function writeTitle()
     if [[ $s == true ]]
     then
         writePrefix ${p} true
-        writeLines ${p} "${CLR_HDR_D}${CLR_HDR}${l}${CLR_RST}"
+        writeLines ${p} "${_CLR_HDR_D}${_CLR_HDR}${l}${_CLR_RST}"
     else
-        writeLines ${p} "${CLR_HDR_D}${CLR_HDR}${l}${CLR_RST}"
+        writeLines ${p} "${_CLR_HDR_D}${_CLR_HDR}${l}${_CLR_RST}"
     fi
 
     if [[ $s == true ]]; then writePrefix ${p} true; fi
@@ -132,20 +132,20 @@ function writeTitle()
 
 function writePrefix()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
     if [[ ${3} != true ]]; then echo -en "  "; fi
 
-    echo -en "${CLR_PRE_D}${CLR_PRE}${1}${CLR_RST}"
+    echo -en "${_CLR_PRE_D}${_CLR_PRE}${1}${_CLR_RST}"
 
     if [[ ${2} == true ]]; then writeNewLine; fi
 }
 
 function writeBlockLarge()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
@@ -160,7 +160,7 @@ function writeBlockLarge()
 
 function writeBlockSmall()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
@@ -168,16 +168,16 @@ function writeBlockSmall()
     local t="${2:-BLOCK}"
     local l="${@:3}"
 
-    OUT_NEW_LINE=false
+    _OUT_NEW_LINE=false
     writeTitle ${p} "${t}" false
-    OUT_PRE_LINE=false
-    OUT_SPACE_F=0
+    _OUT_PRE_LINE=false
+    _OUT_SPACE_F=0
     writeLines ${p} ${l[@]}
 }
 
 function writeBlock()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
@@ -191,7 +191,7 @@ function writeBlock()
 
 function writeSequence()
 {
-    if [[ "${B_VERY_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_QUIET}" -eq 1 ]]; then
         return
     fi
 
@@ -201,14 +201,14 @@ function writeSequence()
 
     for seq in $(seq 1 ${i})
     do
-        echo -en "${CLR_TXT_D}${CLR_TXT}"
+        echo -en "${_CLR_TXT_D}${_CLR_TXT}"
 
         if [[ ${c} != false ]]
         then
             echo -en "${3}"
         fi
 
-        echo -en "${s}${CLR_RST}"
+        echo -en "${s}${_CLR_RST}"
     done
 
     colorReset
@@ -220,8 +220,8 @@ function writeFailedLogOutput()
     local task="${2}"
     local size=$(wc -l < "${file}")
 
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
+        colorAssign "${_CLR_L_RED}" "${_CLR_B_RED}" "${_CLR_L_WHITE}"
         writeBlockLarge "##" "CRIT" "Failed command log output: ${file}"
 
         return
@@ -241,9 +241,9 @@ function writeFailedLogOutput()
 
     writeSmallWarning "$(printf 'Command output logged %d %s to file: %s' ${size} ${lines_pluralized} "${file}")"
 
-    echo -en "  ${CLR_L_YELLOW}++-- ${CLR_B_YELLOW}LOG DUMP START${CLR_L_YELLOW} [ ${task} ] --++${CLR_RST}" && writeNewLine && writeNewLine
+    echo -en "  ${_CLR_L_YELLOW}++-- ${_CLR_B_YELLOW}LOG DUMP START${_CLR_L_YELLOW} [ ${task} ] --++${_CLR_RST}" && writeNewLine && writeNewLine
     cat ${file} | sed '/^\s*$/d'
-    writeNewLine && echo -en "  ${CLR_L_YELLOW}++-- ${CLR_B_YELLOW}LOG DUMP END  ${CLR_L_YELLOW} [ ${task} ] --++${CLR_RST}" && writeNewLine
+    writeNewLine && echo -en "  ${_CLR_L_YELLOW}++-- ${_CLR_B_YELLOW}LOG DUMP END  ${_CLR_L_YELLOW} [ ${task} ] --++${_CLR_RST}" && writeNewLine
 
     removeFile "${file}"
 }
@@ -257,7 +257,7 @@ function removeFile()
         return
     fi
 
-    if [[ ${allow_preserve} == "true" ]] && [[ "${BLD_TMP_PRESERVE}" == "true" ]]; then
+    if [[ ${allow_preserve} == "true" ]] && [[ "${_BLD_TMP_PRESERVE}" == "true" ]]; then
         writeDebug "Preserving temporary file: ${file}"
         return
     fi
@@ -268,32 +268,32 @@ function removeFile()
 
 function appendLogBufferLines()
 {
-    LOG_BUF+=("${@}")
+    _LOG_BUF+=("${@}")
 }
 
 function flushLogBufferLines()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
-        LOG_BUF=()
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
+        _LOG_BUF=()
         return
     fi
 
     local t="${1:-MAKE}"
     local p="${2:-==}"
 
-    if [[ ${#LOG_BUF[@]} -lt 1 ]]
+    if [[ ${#_LOG_BUF[@]} -lt 1 ]]
     then
         writeWarning "No log build lines to flush."
     fi
 
-    for l in "${LOG_BUF[@]}"
+    for l in "${_LOG_BUF[@]}"
     do
-        colorAssign "${CLR_L_BLUE}" "${CLR_L_BLUE}"
+        colorAssign "${_CLR_L_BLUE}" "${_CLR_L_BLUE}"
 
-        OUT_NEW_LINE=false
+        _OUT_NEW_LINE=false
         writeTitle ${p} ${t} false
 
-        OUT_PRE_LINE=false && OUT_SPACE_F=0 && OUT_SPACE_N=5
+        _OUT_PRE_LINE=false && _OUT_SPACE_F=0 && _OUT_SPACE_N=5
         writeLines ${p} "${l[@]}"
     done
 
@@ -303,19 +303,19 @@ function flushLogBufferLines()
 
 function writeEnter()
 {
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    colorAssign "${_CLR_L_GREEN}" "${_CLR_L_GREEN}" "${_CLR_L_WHITE}"
     writeBlockSmall ">>" "INIT" "${@}"
     colorReset
 }
 
 function writeEnvironmentEnter()
 {
-    if [[ "${B_VERBOSE}" -eq 1 ]]; then
-        colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    if [[ "${_BLD_OUT_VERBOSE}" -eq 1 ]]; then
+        colorAssign "${_CLR_L_GREEN}" "${_CLR_L_GREEN}" "${_CLR_L_WHITE}"
         writeBlockSmall ">>" "INIT" "$(printf '[%s]' "${1,,}")"
         colorReset
     fi
@@ -323,77 +323,77 @@ function writeEnvironmentEnter()
 
 function writeSectionEnter()
 {
-    if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_B_WHITE}" "${CLR_B_WHITE}" "${CLR_B_WHITE}"
+    colorAssign "${_CLR_B_WHITE}" "${_CLR_B_WHITE}" "${_CLR_B_WHITE}"
     writeBlockSmall "->" "INIT" "${@}"
     colorReset
 }
 
 function writeExit()
 {
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    colorAssign "${_CLR_L_GREEN}" "${_CLR_L_GREEN}" "${_CLR_L_WHITE}"
     writeBlockSmall "<<" "DONE" "${@}"
     colorReset
 }
 
 function writeEnvironmentExit()
 {
-    if [[ "${B_VERY_VERBOSE}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_VERY_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_GREEN}" "${CLR_L_GREEN}" "${CLR_L_WHITE}"
+    colorAssign "${_CLR_L_GREEN}" "${_CLR_L_GREEN}" "${_CLR_L_WHITE}"
     writeBlockSmall "<<" "DONE" "$(printf '[%s]' "${1,,}")"
     colorReset
 }
 
 function writeSectionExit()
 {
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_VERBOSE}" -ne 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_B_WHITE}" "${CLR_B_WHITE}" "${CLR_B_WHITE}"
+    colorAssign "${_CLR_B_WHITE}" "${_CLR_B_WHITE}" "${_CLR_B_WHITE}"
     writeBlockSmall "<-" "DONE" "${@}"
     colorReset
 }
 
 function writeCritical()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_RED}" "${CLR_L_RED}" "${CLR_L_RED}"
+    colorAssign "${_CLR_L_RED}" "${_CLR_L_RED}" "${_CLR_L_RED}"
     writeBlock "##" "FAIL" "${@}"
     colorReset
 }
 
 function writeSectionCritical()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_WHITE}" "${CLR_L_WHITE}" "${CLR_WHITE}"
+    colorAssign "${_CLR_WHITE}" "${_CLR_L_WHITE}" "${_CLR_WHITE}"
     writeBlockSmall "##" "FAIL" "${@}"
     colorReset
 }
 
 function writeExecuted()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_PURPLE}" "${CLR_L_PURPLE}"
+    colorAssign "${_CLR_L_PURPLE}" "${_CLR_L_PURPLE}"
     writeBlockSmall "++" "EXEC" "${@}"
     colorReset
 }
@@ -408,7 +408,7 @@ function writeAndExecute()
         writeExecuted "${command_bin}"
     fi
 
-    ${command_bin} &>> ${RUN_ACTION_SOURCE_LOGS} || command_ret=$?
+    ${command_bin} &>> ${_RUN_ACTION_SOURCE_LOGS} || command_ret=$?
 
     return ${command_ret}
 }
@@ -419,7 +419,7 @@ function doRunCmdInline()
     local cmd_ret=0
 
     if [[ "${cmd}" == "" ]]; then
-        writeDebug "$(printf 'No command defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT} ${ACTION_CONTEXT} ${ACTION_TYPE} "${BLD_MODE_DESC,,}" "${RUN_ACTION_SOURCE_INST:-null}")"
+        writeDebug "$(printf 'No command defined in index "%d" for "%s:%s[%s]" context: %s' ${_RUN_ACTION_COUNT} ${_ACTION_CONTEXT} ${_ACTION_TYPE} "${_BLD_MODE_DESC,,}" "${_RUN_ACTION_SOURCE_INST:-null}")"
         return
     fi
 
@@ -437,7 +437,7 @@ function doRunCmdExternal()
     local exe="${1}"
 
     if [[ "${exe}" == "" ]]; then
-        writeWarning "$(printf 'No executable defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT:-x} ${ACTION_CONTEXT:-x} ${ACTION_TYPE:-x} "${BLD_MODE_DESC,,:-x}" "${RUN_ACTION_SOURCE_INST:-x}")"
+        writeWarning "$(printf 'No executable defined in index "%d" for "%s:%s[%s]" context: %s' ${_RUN_ACTION_COUNT:-x} ${_ACTION_CONTEXT:-x} ${_ACTION_TYPE:-x} "${_BLD_MODE_DESC,,:-x}" "${_RUN_ACTION_SOURCE_INST:-x}")"
         return
     fi
 
@@ -463,31 +463,31 @@ function doRunSqlStatement()
     local db_user="${4:-x}"
 
     if [[ "${statement}" == "" ]]; then
-        writeWarning "$(printf 'No sql statement defined in index "%d" for "%s:%s[%s]" context: %s' ${RUN_ACTION_COUNT:-x} ${ACTION_CONTEXT:-x} ${ACTION_TYPE:-x} "${BLD_MODE_DESC,,:-x}" "${RUN_ACTION_SOURCE_INST:-x}")"
+        writeWarning "$(printf 'No sql statement defined in index "%d" for "%s:%s[%s]" context: %s' ${_RUN_ACTION_COUNT:-x} ${_ACTION_CONTEXT:-x} ${_ACTION_TYPE:-x} "${_BLD_MODE_DESC,,:-x}" "${_RUN_ACTION_SOURCE_INST:-x}")"
         return
     fi
 
     if [[ "${db_user}" == "x" ]]; then
-        db_user="${BLD_DB_USER}"
+        db_user="${_BLD_DB_USER}"
     fi
 
     if [[ "${db_pass}" == "x" ]]; then
-        db_pass="${BLD_DB_PASS}"
+        db_pass="${_BLD_DB_PASS}"
     fi
 
     if [[ "${db_name}" == "x" ]]; then
-        db_name="${BLD_DB_NAME}"
+        db_name="${_BLD_DB_NAME}"
     fi
 
     local command_ret=0
-    local command_bin="$(which mysql) -u${BLD_DB_USER}"
+    local command_bin="$(which mysql) -u${_BLD_DB_USER}"
 
-    if [[ "${BLD_DB_PASS}" != "" ]]; then
-        command_bin="${command_bin} -p\"${BLD_DB_PASS}\""
+    if [[ "${_BLD_DB_PASS}" != "" ]]; then
+        command_bin="${command_bin} -p\"${_BLD_DB_PASS}\""
     fi
 
-    if [[ "${BLD_DB_NAME}" != "" ]]; then
-        command_bin="${command_bin} ${BLD_DB_NAME}"
+    if [[ "${_BLD_DB_NAME}" != "" ]]; then
+        command_bin="${command_bin} ${_BLD_DB_NAME}"
     fi
 
     command_bin="${command_bin} -e \"${statement}\""
@@ -520,10 +520,10 @@ function doRunCmdUsingTemporaryFile()
     echo "" >> "${command_tmp}"
     echo "#" >> "${command_tmp}"
     echo "# builder temporary script" >> "${command_tmp}"
-    echo "# $(printf '%s:%s:%s' ${ACTION_CONTEXT:-x} ${ACTION_TYPE:-x} "${BLD_MODE_DESC,,}")" >> "${command_tmp}"
+    echo "# $(printf '%s:%s:%s' ${_ACTION_CONTEXT:-x} ${_ACTION_TYPE:-x} "${_BLD_MODE_DESC,,}")" >> "${command_tmp}"
     echo "#" >> "${command_tmp}"
     echo "" >> "${command_tmp}"
-    echo "cd ${BLDR_PATH_NAME}/.. || exit \$?" >> "${command_tmp}"
+    echo "cd ${_BLDR_PATH_NAME}/.. || exit \$?" >> "${command_tmp}"
     for l in "${lines[@]}"; do
         echo "${l} || exit \$?" >> "${command_tmp}"
     done
@@ -540,7 +540,7 @@ function doRunCmdUsingTemporaryFile()
 
 function writeSourcedFile()
 {
-    colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
+    colorAssign "${_CLR_YELLOW}" "${_CLR_YELLOW}"
     writeBlockSmall "--" "FILE" "${@}"
     colorReset
 }
@@ -557,15 +557,15 @@ function writeActionSourcedFile()
         text="${file} (${more})"
     fi
 
-    colorAssign "${CLR_YELLOW}" "${CLR_B_YELLOW}" "${CLR_B_WHITE}"
+    colorAssign "${_CLR_YELLOW}" "${_CLR_B_YELLOW}" "${_CLR_B_WHITE}"
     writeBlockSmall "==" "FILE" "${text}"
     colorReset
 }
 
 function writeDebugSourcedFile()
 {
-    if [[ "${B_VERY_VERBOSE}" -eq 1 ]]; then
-        colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
+    if [[ "${_BLD_OUT_VERY_VERBOSE}" -eq 1 ]]; then
+        colorAssign "${_CLR_YELLOW}" "${_CLR_YELLOW}"
         writeBlockSmall "--" "FILE" "${@}"
         colorReset
     fi
@@ -573,35 +573,35 @@ function writeDebugSourcedFile()
 
 function writeInfo()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_YELLOW}" "${CLR_YELLOW}"
+    colorAssign "${_CLR_YELLOW}" "${_CLR_YELLOW}"
     writeBlockSmall "--" "INFO" "${@}"
     colorReset
 }
 
 function writeDebug()
 {
-    if [[ "${B_DEBUG}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_DEBUG}" -ne 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_WHITE}" "${CLR_B_WHITE}"
+    colorAssign "${_CLR_L_WHITE}" "${_CLR_B_WHITE}"
     writeBlockSmall "<>" "DEBUG" "${@}"
     colorReset
 }
 
 function writeWarning()
 {
-    if [[ "${B_QUIET}" -eq 1 ]]; then
+    if [[ "${_BLD_OUT_QUIET}" -eq 1 ]]; then
         return
     fi
 
-    colorAssign "${CLR_L_RED}" "${CLR_L_RED}"
+    colorAssign "${_CLR_L_RED}" "${_CLR_L_RED}"
 
-    if [[ "${B_VERBOSE}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_VERBOSE}" -ne 1 ]]; then
         writeBlockSmall "!!" "WARN" "${@}"
     else
         writeBlockLarge "!!" "WARN" "${@}"
@@ -613,17 +613,17 @@ function writeWarning()
 function writeSmallWarning()
 {
     local message="${1,,}"
-    local state_b_verbose=${B_VERBOSE}
+    local state_b_verbose=${_BLD_OUT_VERBOSE}
 
-    B_VERBOSE=0
+    _BLD_OUT_VERBOSE=0
     writeWarning "${message}"
-    B_VERBOSE=${state_b_verbose}
+    _BLD_OUT_VERBOSE=${state_b_verbose}
 }
 
 function writeError()
 {
-    if [[ "${B_VERY_QUIET}" -ne 1 ]]; then
-        colorAssign "${CLR_L_RED}" "${CLR_B_RED}" "${CLR_L_WHITE}"
+    if [[ "${_BLD_OUT_VERY_QUIET}" -ne 1 ]]; then
+        colorAssign "${_CLR_L_RED}" "${_CLR_B_RED}" "${_CLR_L_WHITE}"
         writeBlockLarge "##" "CRIT" "${@}"
         colorReset
     fi
@@ -633,8 +633,8 @@ function writeError()
 
 function writeComplete()
 {
-    if [[ "${B_DEBUG}" -eq 1 ]]; then
-        colorAssign "${CLR_L_WHITE}" "${CLR_L_WHITE}" "${CLR_L_WHITE}"
+    if [[ "${_BLD_OUT_DEBUG}" -eq 1 ]]; then
+        colorAssign "${_CLR_L_WHITE}" "${_CLR_L_WHITE}" "${_CLR_L_WHITE}"
         writeBlock "--" "EXITING" "${@}"
         colorReset
     fi
@@ -642,7 +642,7 @@ function writeComplete()
 
 function writeDefinitionListing()
 {
-    if [[ "${B_DEBUG}" -ne 1 ]]; then
+    if [[ "${_BLD_OUT_DEBUG}" -ne 1 ]]; then
         return
     fi
 
@@ -674,9 +674,9 @@ function writeDefinitionListing()
 
     iterationRemainder=0
     leftMaxLength=$(((${leftMaxLength} + 3)))
-    CLR_PRE=${CLR_WHITE}
+    _CLR_PRE=${_CLR_WHITE}
 
-    echo -e "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}"
+    echo -e "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}"
 
     for i in $(seq 0 1 $(((${iterations} - 1))))
     do
@@ -694,9 +694,9 @@ function writeDefinitionListing()
                 titleSurround="${titleSurround}-"
             done
 
-            [[ $i != 0 ]] && echo -e "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}\n  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}"
-            echo -e "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}${CLR_WHITE}${title^^}${CLR_RST}"
-            echo -e "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}"
+            [[ $i != 0 ]] && echo -e "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}\n  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}"
+            echo -e "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}${_CLR_WHITE}${title^^}${_CLR_RST}"
+            echo -e "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}"
 
             continue
         fi
@@ -705,7 +705,7 @@ function writeDefinitionListing()
         then
             iterationRemainder=$(inverseBoolValueAsInt ${iterationRemainder})
 
-            echo -e "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}"
+            echo -e "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}"
             continue
         fi
 
@@ -716,17 +716,17 @@ function writeDefinitionListing()
 
         dotCount=$(((${leftMaxLength} - $(echo ${line} | wc -m) + 2)))
 
-        echo -en "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}"
-        echo -en "${CLR_RST}${CLR_TXT_D}${CLR_TXT}"
+        echo -en "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}"
+        echo -en "${_CLR_RST}${_CLR_TXT_D}${_CLR_TXT}"
         echo -en "${line} "
         for i in $(seq 1 ${dotCount})
         do
-            echo -en "${CLR_B_BLACK}.${CLR_RST}"
+            echo -en "${_CLR_B_BLACK}.${_CLR_RST}"
         done
-        echo -e " ${CLR_L_WHITE}${value/#$DIR_CWD\//}${CLR_RST}"
+        echo -e " ${_CLR_L_WHITE}${value/#$_DIR_CWD\//}${_CLR_RST}"
     done
 
-    echo -e "  ${CLR_PRE_D}${CLR_PRE}${prefix}${CLR_RST}"
+    echo -e "  ${_CLR_PRE_D}${_CLR_PRE}${prefix}${_CLR_RST}"
 
     colorReset
 }
@@ -735,11 +735,11 @@ function getReadyTempPath()
 {
     local dirty="$(readlink -m ${1})"
     local rmdir=${2:-true}
-    local ddiff="${dirty/$DIR_CWD/good}"
+    local ddiff="${dirty/$_DIR_CWD/good}"
 
     if [[ "${ddiff:0:4}" != "good" ]]
     then
-        clean="$(readlink -m ${DIR_CWD}/build/bldr-fallback/)"
+        clean="$(readlink -m ${_DIR_CWD}/build/bldr-fallback/)"
     else
         clean="$(readlink -m ${dirty})"
     fi
@@ -847,7 +847,7 @@ function getVersionOfHhvmRepoSchema()
 
 function getVersionOfPhp()
 {
-    local v="$(${BIN_PHP} -v 2> /dev/null |\
+    local v="$(${_BIN_PHP} -v 2> /dev/null |\
         grep -P -o '(PHP|php)\s*([0-9]{1,2}\.){2}([0-9]{1,2})' 2> /dev/null |\
         cut -d' ' -f2 2> /dev/null)"
     local len="$(echo "${v}" | wc -m)"
@@ -862,7 +862,7 @@ function getVersionOfPhp()
 
 function getVersionOfPhpOpcache()
 {
-    local v="$(${BIN_PHP} -v 2> /dev/null |\
+    local v="$(${_BIN_PHP} -v 2> /dev/null |\
         grep -P -o '(OPcache)\s*v([0-9]{1,2}\.){2}([0-9]{1,2})(-[a-z]+)?' 2> /dev/null |\
         cut -d' ' -f2 2> /dev/null)"
     local len="$(echo "${v}" | wc -m)"
@@ -877,7 +877,7 @@ function getVersionOfPhpOpcache()
 
 function getVersionOfPhpXdebug()
 {
-    local v="$(${BIN_PHP} -v 2> /dev/null |\
+    local v="$(${_BIN_PHP} -v 2> /dev/null |\
         grep -P -o '(Xdebug)\s*v([0-9]{1,2}\.){2}([0-9]{1,2})([a-zA-Z0-9-]+)?' 2> /dev/null |\
         cut -d' ' -f2 2> /dev/null)"
     local len="$(echo "${v}" | wc -m)"
@@ -892,7 +892,7 @@ function getVersionOfPhpXdebug()
 
 function getVersionOfPhpEnv()
 {
-    local v="$(${BIN_PHPENV} -v 2> /dev/null |\
+    local v="$(${_BIN_PHPENV} -v 2> /dev/null |\
         grep -P -o '(ENV|env)\s*([0-9]{1,2}\.){2}([0-9]{1,2})([0-9a-z-]+)?' 2> /dev/null |\
         cut -d' ' -f2 2> /dev/null)"
     local len="$(echo "${v}" | wc -m)"
@@ -907,7 +907,7 @@ function getVersionOfPhpEnv()
 
 function getVersionOfPhpEngApi()
 {
-    local v="$(${BIN_PHPIZE} -v 2> /dev/null |\
+    local v="$(${_BIN_PHPIZE} -v 2> /dev/null |\
         grep -o -P '[0-9]{8,9}' 2> /dev/null |\
         head -n 1 2> /dev/null)"
     local len="$(echo "${v}" | wc -m)"
@@ -922,7 +922,7 @@ function getVersionOfPhpEngApi()
 
 function getVersionOfPhpModApi()
 {
-    local v="$(${BIN_PHPIZE} -v 2> /dev/null |\
+    local v="$(${_BIN_PHPIZE} -v 2> /dev/null |\
         grep -o -P '[0-9]{8,9}' 2> /dev/null |\
         tail -n 1 2> /dev/null)"
     local len="$(echo "${v}" | wc -m)"
@@ -937,10 +937,10 @@ function getVersionOfPhpModApi()
 
 function getMajorPHPVersion()
 {
-    if [ ${VER_PHP_ON_5} ]
+    if [ ${_VER_PHP_ON_5} ]
     then
         echo "5"
-    elif [ ${VER_PHP_ON_7} ]
+    elif [ ${_VER_PHP_ON_7} ]
     then
         echo "7"
     else
@@ -950,7 +950,7 @@ function getMajorPHPVersion()
 
 function isExtensionEnabled()
 {
-    ${BIN_PHP} -m 2> /dev/null | grep ${1} &>> /dev/null
+    ${_BIN_PHP} -m 2> /dev/null | grep ${1} &>> /dev/null
 
     if [ $? -eq 0 ]
     then
@@ -970,18 +970,18 @@ function isExtensionPeclInstalled()
         return
     fi
 
-    if [[ "${BIN_PECL}" == "" ]] || [[ ! -x "${BIN_PECL:-x}" ]]; then
+    if [[ "${_BIN_PECL}" == "" ]] || [[ ! -x "${_BIN_PECL:-x}" ]]; then
         echo "false"
         return
     fi
 
-    if [[ "${BIN_PECL}" == "" ]];
+    if [[ "${_BIN_PECL}" == "" ]];
     then
         echo "false"
         return
     fi
 
-    ${BIN_PECL} &>> /dev/null
+    ${_BIN_PECL} &>> /dev/null
 
     if [[ $? != 0 ]]
     then
@@ -989,7 +989,7 @@ function isExtensionPeclInstalled()
         return
     fi
 
-    ${BIN_PECL} list | grep "${1}" &>> /dev/null
+    ${_BIN_PECL} list | grep "${1}" &>> /dev/null
 
     if [ $? -eq 0 ]
     then

@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${APP_MAKE_CLI} assets:install --symlink"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${_APP_MAKE_CLI} assets:install --symlink"
 )
 

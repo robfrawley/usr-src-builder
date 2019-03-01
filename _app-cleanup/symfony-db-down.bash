@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${APP_MAKE_CLI} doctrine:database:drop -n --force"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${_APP_MAKE_CLI} doctrine:database:drop -n --force"
 )
 

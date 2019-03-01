@@ -9,163 +9,163 @@
 # file distributed with this source code.
 ##
 
-SCRIPT_SELF_PATH="${0}"
-SCRIPT_SELF_BASE="$(basename ${0})"
-SCRIPT_SELF_REAL="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+_SCRIPT_SELF_PATH="${0}"
+_SCRIPT_SELF_BASE="$(basename ${0})"
+_SCRIPT_SELF_REAL="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-type writeLines &>> /dev/null || . ${SCRIPT_SELF_REAL}/../_common/bash-inc_all.bash
+type writeLines &>> /dev/null || . ${_SCRIPT_SELF_REAL}/../_common/bash-inc_all.bash
 
-if [ -z ${MOD_NAME} ]
+if [ -z ${_MOD_NAME} ]
 then
-    MOD_NAME="$(basename ${SCRIPT_SELF_BASE} .bash)"
+    _MOD_NAME="$(basename ${_SCRIPT_SELF_BASE} .bash)"
 fi
 
-MOD_SOURCE_CONFIG="${INC_PHP_EXTS_PATH}/php-$(getMajorPHPVersion)/${MOD_NAME}.bash"
+_MOD_SOURCE_CONFIG="${_INC_PHP_EXTS_PATH}/php-$(getMajorPHPVersion)/${_MOD_NAME}.bash"
 
-if [ ! -f ${MOD_SOURCE_CONFIG} ]
+if [ ! -f ${_MOD_SOURCE_CONFIG} ]
 then
-    writeError "Could not find valid script \"${MOD_SOURCE_CONFIG}\"."
+    writeError "Could not find valid script \"${_MOD_SOURCE_CONFIG}\"."
 fi
 
-writeSectionEnter "Install \"${MOD_NAME}\" extension."
+writeSectionEnter "Install \"${_MOD_NAME}\" extension."
 
-MOD_PECL_CMD=false
-MOD_PECL_CMD_URL=false
-MOD_PECL_DL=false
-MOD_PECL_DL_NAME=false
-MOD_PECL_GIT=false
-MOD_PECL_GIT_BRANCH="master"
-MOD_PECL_GIT_DIR=""
-MOD_PECL_FLAGS=""
-MOD_PECL_CD=false
-MOD_PECL_RET=0
-MOD_RESULT=0
+_MOD_PECL_CMD=false
+_MOD_PECL_CMD_URL=false
+_MOD_PECL_DL=false
+_MOD_PECL_DL_NAME=false
+_MOD_PECL_GIT=false
+_MOD_PECL_GIT_BRANCH="master"
+_MOD_PECL_GIT_DIR=""
+_MOD_PECL_FLAGS=""
+_MOD_PECL_CD=false
+_MOD_PECL_RET=0
+_MOD_RESULT=0
 
-writeActionSourcedFile "${MOD_SOURCE_CONFIG}"
+writeActionSourcedFile "${_MOD_SOURCE_CONFIG}"
 
-. ${MOD_SOURCE_CONFIG}
+. ${_MOD_SOURCE_CONFIG}
 
-MOD_PECL_LOG=$(getReadyTempFilePath "${LOG_EXT}/${MOD_NAME//[^A-Za-z0-9._-]/_}.log")
-MOD_PECL_BLD=$(getReadyTempPath "${BLD_EXT}/${MOD_NAME//[^A-Za-z0-9._-]/_}")
+_MOD_PECL_LOG=$(getReadyTempFilePath "${_LOG_EXT}/${_MOD_NAME//[^A-Za-z0-9._-]/_}.log")
+_MOD_PECL_BLD=$(getReadyTempPath "${_BLD_EXT}/${_MOD_NAME//[^A-Za-z0-9._-]/_}")
 
-if [[ $(isExtensionEnabled ${MOD_NAME}) == "true" ]] && [[ $(isExtensionPeclInstalled ${MOD_NAME}) == "true" ]]
+if [[ $(isExtensionEnabled ${_MOD_NAME}) == "true" ]] && [[ $(isExtensionPeclInstalled ${_MOD_NAME}) == "true" ]]
 then
-    appendLogBufferLines "${CMD_PRE}pecl uninstall ${MOD_NAME} &>> /dev/null"
+    appendLogBufferLines "${_CMD_PRE}pecl uninstall ${_MOD_NAME} &>> /dev/null"
 
-    ${CMD_PRE} pecl uninstall ${MOD_NAME} &>> ${MOD_PECL_LOG} || \
+    ${_CMD_PRE} pecl uninstall ${_MOD_NAME} &>> ${_MOD_PECL_LOG} || \
         writeWarning "Failed to remove previous install; blindly attempting to continue anyway."
 fi
 
-if [[ ${MOD_PECL_CMD} != false ]]
+if [[ ${_MOD_PECL_CMD} != false ]]
 then
 
-    if [[ ${MOD_PECL_CMD_URL} == false ]]
+    if [[ ${_MOD_PECL_CMD_URL} == false ]]
     then
-        MOD_PECL_CMD_URL="${MOD_NAME}"
+        _MOD_PECL_CMD_URL="${_MOD_NAME}"
     fi
 
-    appendLogBufferLines "${CMD_PRE}pecl install --force ${MOD_PECL_CMD_URL}" &&\
+    appendLogBufferLines "${_CMD_PRE}pecl install --force ${_MOD_PECL_CMD_URL}" &&\
         flushLogBufferLines
 
-    printf "\n" | ${CMD_PRE} pecl install --force ${MOD_PECL_CMD_URL} &>> "${MOD_PECL_LOG}" || \
-        MOD_PECL_RET=$?
+    printf "\n" | ${_CMD_PRE} pecl install --force ${_MOD_PECL_CMD_URL} &>> "${_MOD_PECL_LOG}" || \
+        _MOD_PECL_RET=$?
 
-elif [[ ${MOD_PECL_DL} != false ]] || [[ ${MOD_PECL_GIT} != false ]]
+elif [[ ${_MOD_PECL_DL} != false ]] || [[ ${_MOD_PECL_GIT} != false ]]
 then
 
-    appendLogBufferLines "cd ${MOD_PECL_BLD}"
+    appendLogBufferLines "cd ${_MOD_PECL_BLD}"
 
-    cd ${MOD_PECL_BLD}
+    cd ${_MOD_PECL_BLD}
 
-    if [[ ${MOD_PECL_DL} != false ]]
+    if [[ ${_MOD_PECL_DL} != false ]]
     then
 
-        if [[ ${MOD_PECL_DL_NAME} == false ]]
+        if [[ ${_MOD_PECL_DL_NAME} == false ]]
         then
-            MOD_PECL_DL_NAME="${MOD_NAME}"
+            _MOD_PECL_DL_NAME="${_MOD_NAME}"
         fi
 
-        appendLogBufferLines "${BIN_CURL} -o ${MOD_NAME}.tar.gz https://pecl.php.net/get/${MOD_PECL_DL_NAME}"
+        appendLogBufferLines "${_BIN_CURL} -o ${_MOD_NAME}.tar.gz https://pecl.php.net/get/${_MOD_PECL_DL_NAME}"
 
-        ${BIN_CURL} -o ${MOD_NAME}.tar.gz https://pecl.php.net/get/${MOD_NAME} &>> ${MOD_PECL_LOG} || \
-            MOD_PECL_RET=$?
+        ${_BIN_CURL} -o ${_MOD_NAME}.tar.gz https://pecl.php.net/get/${_MOD_NAME} &>> ${_MOD_PECL_LOG} || \
+            _MOD_PECL_RET=$?
 
-        appendLogBufferLines "${BIN_TAR} xzf ${MOD_NAME}.tar.gz && cd [...]"
+        appendLogBufferLines "${_BIN_TAR} xzf ${_MOD_NAME}.tar.gz && cd [...]"
 
-        ${BIN_TAR} xzf ${MOD_NAME}.tar.gz &>> ${MOD_PECL_LOG} || \
-            MOD_PECL_RET=$?
+        ${_BIN_TAR} xzf ${_MOD_NAME}.tar.gz &>> ${_MOD_PECL_LOG} || \
+            _MOD_PECL_RET=$?
 
     else
 
-        appendLogBufferLines "${BIN_GIT} clone ${MOD_PECL_GIT} ${MOD_NAME} && cd [...]" && \
-            appendLogBufferLines "${BIN_GIT} checkout ${MOD_PECL_GIT_BRANCH:-master}"
+        appendLogBufferLines "${_BIN_GIT} clone ${_MOD_PECL_GIT} ${_MOD_NAME} && cd [...]" && \
+            appendLogBufferLines "${_BIN_GIT} checkout ${_MOD_PECL_GIT_BRANCH:-master}"
 
-        ${BIN_GIT} clone -b ${MOD_PECL_GIT_BRANCH:-master} ${MOD_PECL_GIT} ${MOD_NAME} &>> ${MOD_PECL_LOG} || \
-            MOD_PECL_RET=$?
+        ${_BIN_GIT} clone -b ${_MOD_PECL_GIT_BRANCH:-master} ${_MOD_PECL_GIT} ${_MOD_NAME} &>> ${_MOD_PECL_LOG} || \
+            _MOD_PECL_RET=$?
 
     fi
 
-    if [[ ${MOD_PECL_CD} != false ]] && [[ -d ${MOD_PECL_CD} ]]
+    if [[ ${_MOD_PECL_CD} != false ]] && [[ -d ${_MOD_PECL_CD} ]]
     then
-        cd ${MOD_PECL_CD} &>> ${MOD_PECL_LOG}
-    elif [[ -d ${MOD_NAME} ]]
+        cd ${_MOD_PECL_CD} &>> ${_MOD_PECL_LOG}
+    elif [[ -d ${_MOD_NAME} ]]
     then
-        cd ${MOD_NAME} &>> ${MOD_PECL_LOG}
+        cd ${_MOD_NAME} &>> ${_MOD_PECL_LOG}
     else
-        cd ${MOD_NAME}* &>> ${MOD_PECL_LOG}
+        cd ${_MOD_NAME}* &>> ${_MOD_PECL_LOG}
     fi
 
-    ${BIN_PHPIZE} &>> ${MOD_PECL_LOG} || \
-        MOD_PECL_RET=$?
+    ${_BIN_PHPIZE} &>> ${_MOD_PECL_LOG} || \
+        _MOD_PECL_RET=$?
 
-    appendLogBufferLines "${BIN_PHPIZE}" && \
-        appendLogBufferLines "./configure ${MOD_PECL_FLAGS}" && \
-        appendLogBufferLines "${BIN_MAKE}" && \
-        appendLogBufferLines "${BIN_MAKE} install" && \
+    appendLogBufferLines "${_BIN_PHPIZE}" && \
+        appendLogBufferLines "./configure ${_MOD_PECL_FLAGS}" && \
+        appendLogBufferLines "${_BIN_MAKE}" && \
+        appendLogBufferLines "${_BIN_MAKE} install" && \
         flushLogBufferLines
 
-    printf "\n" | ./configure ${MOD_PECL_FLAGS} &>> ${MOD_PECL_LOG} || \
-        MOD_PECL_RET=$?
+    printf "\n" | ./configure ${_MOD_PECL_FLAGS} &>> ${_MOD_PECL_LOG} || \
+        _MOD_PECL_RET=$?
 
-    ${BIN_MAKE} &>> ${MOD_PECL_LOG} || \
-        MOD_PECL_RET=$?
+    ${_BIN_MAKE} &>> ${_MOD_PECL_LOG} || \
+        _MOD_PECL_RET=$?
 
-    ${BIN_MAKE} install &>> ${MOD_PECL_LOG} || \
-        MOD_PECL_RET=$?
+    ${_BIN_MAKE} install &>> ${_MOD_PECL_LOG} || \
+        _MOD_PECL_RET=$?
 
-    cd "$DIR_CWD"
+    cd "$_DIR_CWD"
 fi
 
-if [[ ${MOD_PECL_RET} == 0 ]] && [[ $(isExtensionEnabled ${MOD_NAME}) != "true" ]]; then
-    if [ ${BIN_PHPENV} ]
+if [[ ${_MOD_PECL_RET} == 0 ]] && [[ $(isExtensionEnabled ${_MOD_NAME}) != "true" ]]; then
+    if [ ${_BIN_PHPENV} ]
     then
-        writeExecuted "${BIN_PHPENV} config-add ${INC_PHP_CONF_PATH}/${MOD_NAME}.ini"
-        ${BIN_PHPENV} config-add "${INC_PHP_CONF_PATH}/${MOD_NAME}.ini" &>> /dev/null || \
-            writeWarning "Could not add ${MOD_NAME}.ini to PHP config."
+        writeExecuted "${_BIN_PHPENV} config-add ${_INC_PHP_CONF_PATH}/${_MOD_NAME}.ini"
+        ${_BIN_PHPENV} config-add "${_INC_PHP_CONF_PATH}/${_MOD_NAME}.ini" &>> /dev/null || \
+            writeWarning "Could not add ${_MOD_NAME}.ini to PHP config."
 
-        writeExecuted "${BIN_PHPENV} conf add ${INC_PHP_CONF_PATH}/${MOD_NAME}.ini"
-        ${BIN_PHPENV} conf add "${INC_PHP_CONF_PATH}/${MOD_NAME}.ini" &>> /dev/null || \
-            writeWarning "Could not add ${MOD_NAME}.ini to PHP config."
+        writeExecuted "${_BIN_PHPENV} conf add ${_INC_PHP_CONF_PATH}/${_MOD_NAME}.ini"
+        ${_BIN_PHPENV} conf add "${_INC_PHP_CONF_PATH}/${_MOD_NAME}.ini" &>> /dev/null || \
+            writeWarning "Could not add ${_MOD_NAME}.ini to PHP config."
 
-        writeExecuted "${BIN_PHPENV} conf enable ${MOD_NAME}"
-        ${BIN_PHPENV} conf enable "${MOD_NAME}" &>> /dev/null || \
-            writeWarning "Could not add ${MOD_NAME} to PHP config."
+        writeExecuted "${_BIN_PHPENV} conf enable ${_MOD_NAME}"
+        ${_BIN_PHPENV} conf enable "${_MOD_NAME}" &>> /dev/null || \
+            writeWarning "Could not add ${_MOD_NAME} to PHP config."
 
-        writeExecuted "${BIN_PHPENV} rehash"
+        writeExecuted "${_BIN_PHPENV} rehash"
 
-        ${BIN_PHPENV} rehash
+        ${_BIN_PHPENV} rehash
     else
         writeWarning \
             "Auto-enabling extensions is only supported in phpenv environments." \
-            "You need to add \"extension=${MOD_NAME}.so\" to enable the extension."
+            "You need to add \"extension=${_MOD_NAME}.so\" to enable the extension."
     fi
 fi
 
-if [[ ${MOD_PECL_RET} == 0 ]]
+if [[ ${_MOD_PECL_RET} == 0 ]]
 then
-    writeSectionExit "Install \"${MOD_NAME}\" extension."
+    writeSectionExit "Install \"${_MOD_NAME}\" extension."
 else
-    writeFailedLogOutput "${MOD_PECL_LOG}" "${MOD_NAME}"
-    writeSectionExit "Install \"${MOD_NAME}\" extension."
+    writeFailedLogOutput "${_MOD_PECL_LOG}" "${_MOD_NAME}"
+    writeSectionExit "Install \"${_MOD_NAME}\" extension."
 fi
 

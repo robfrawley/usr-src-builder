@@ -9,8 +9,8 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="memcached"
-MOD_PECL_GIT=https://github.com/php-memcached-dev/php-memcached.git
-MOD_PECL_FLAGS="--enable-memcached-igbinary"
+_MOD_NAME="memcached"
+_MOD_PECL_GIT=https://github.com/php-memcached-dev/php-memcached.git
+_MOD_PECL_FLAGS="--enable-memcached-igbinary"
 
 # EOF

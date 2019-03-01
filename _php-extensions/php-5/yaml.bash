@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="yaml"
-MOD_PECL_CMD=true
+_MOD_NAME="yaml"
+_MOD_PECL_CMD=true
 
 # EOF

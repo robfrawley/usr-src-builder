@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-	"rm -fr ${DIR_CWD}/composer"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+	"rm -fr ${_DIR_CWD}/composer"
 )
 

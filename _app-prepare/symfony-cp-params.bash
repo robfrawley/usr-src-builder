@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
+_RUN_ACTION_INSTRUCTIONS_CMD=(
 	"rm -f app/config/parameters.yml"
     "cp app/config/parameters.yml.test app/config/parameters.yml"
 )

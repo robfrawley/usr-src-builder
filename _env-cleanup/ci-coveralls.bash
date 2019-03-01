@@ -9,11 +9,6 @@
 # file distributed with this source code.
 ##+
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${BIN_PHP} $(readlink -m bin/php-coveralls) -vvv -x ${COV_PATH}"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${_BIN_PHP} ${_BLD_COVERALLS_BIN_PATH} ${_BLD_COVERALLS_BIN_OPTS}"
 )
-
-RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=(
-    "${BIN_PHP} $(readlink -m bin/coveralls) -vvv -x ${COV_PATH}"
-)
-

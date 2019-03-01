@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##+
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${BIN_PHP} $(readlink -m bin/codacycoverage) clover -n ${COV_PATH}"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${_BIN_PHP} ${_BLD_CODACY_BIN_PATH} ${_BLD_CODACY_BIN_OPTS}"
 )
 

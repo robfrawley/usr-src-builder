@@ -11,12 +11,12 @@
 
 type writeLines &>> /dev/null || exit -1
 
-export BLD_MODE="app prep"
-export BLD_MODE_DESC="application-prepare"
-export BLD_MODE_APPEND=false
-export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_app_prep}))
-export BLD_PATH=${INC_APP_PREP_PATH}
+export _BLD_MODE="app prep"
+export _BLD_MODE_DESC="application-prepare"
+export _BLD_MODE_APPEND=false
+export _BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_app_prep}))
+export _BLD_PATH=${_INC_APP_PREP_PATH}
 
-writeDebugSourcedFile "${BLD_PATH}/_app-prepare.bash"
-. "${BLD_PATH}/_app-prepare.bash"
+writeDebugSourcedFile "${_BLD_PATH}/_app-prepare.bash"
+. "${_BLD_PATH}/_app-prepare.bash"
 

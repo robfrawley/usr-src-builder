@@ -9,8 +9,4 @@
 # file distributed with this source code.
 ##
 
-_RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${_APP_MAKE_CLI} doctrine:database:create -n"
-    "${_APP_MAKE_CLI} doctrine:schema:create -n"
-)
-
+export _BLD_ENV_MAKE_VER_IMAGE_MAGIK="6.9.3-2"

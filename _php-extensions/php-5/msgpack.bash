@@ -9,8 +9,8 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="msgpack"
-MOD_PECL_CMD=true
-MOD_PECL_CMD_URL="channel://pecl.php.net/msgpack-0.5.6"
+_MOD_NAME="msgpack"
+_MOD_PECL_CMD=true
+_MOD_PECL_CMD_URL="channel://pecl.php.net/msgpack-0.5.6"
 
 # EOF

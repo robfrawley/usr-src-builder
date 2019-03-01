@@ -11,12 +11,12 @@
 
 type writeLines &>> /dev/null || exit -1
 
-export BLD_MODE="ci"
-export BLD_MODE_DESC="environment-tear-down"
-export BLD_MODE_APPEND=false
-export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_env_post}))
-export BLD_PATH=${INC_ENV_POST_PATH}
+export _BLD_MODE="ci"
+export _BLD_MODE_DESC="environment-tear-down"
+export _BLD_MODE_APPEND=false
+export _BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_env_post}))
+export _BLD_PATH=${_INC_ENV_POST_PATH}
 
-writeDebugSourcedFile "${INC_ENV_POST_PATH}/_env-cleanup.bash"
-. "${INC_ENV_POST_PATH}/_env-cleanup.bash"
+writeDebugSourcedFile "${_INC_ENV_POST_PATH}/_env-cleanup.bash"
+. "${_INC_ENV_POST_PATH}/_env-cleanup.bash"
 

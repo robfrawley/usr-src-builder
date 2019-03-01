@@ -9,8 +9,8 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="msgpack"
-MOD_PECL_GIT=https://github.com/msgpack/msgpack-php.git
-MOD_PECL_GIT_BRANCH="php7"
+_MOD_NAME="msgpack"
+_MOD_PECL_GIT=https://github.com/msgpack/msgpack-php.git
+_MOD_PECL_GIT_BRANCH="php7"
 
 # EOF

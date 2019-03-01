@@ -9,24 +9,24 @@
 # file distributed with this source code.
 ##
 
-export RUN_ACTION_RETURN_GLOB=0
-export RUN_ACTION_INSTRUCTIONS_CMD=()
-export RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
-export BLD_COMMANDS_INC=false
-export BLD_MODE_DESC_HIDE="true"
+export _RUN_ACTION_RETURN_GLOB=0
+export _RUN_ACTION_INSTRUCTIONS_CMD=()
+export _RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=()
+export _BLD_COMMANDS_INC=false
+export _BLD_MODE_DESC_HIDE="true"
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${BIN_PHPENV} config-add ${BLD_PATH}/${RUN_ACTION_INSTRUCTIONS_PHP_INC}.ini"
-    "${BIN_PHPENV} conf enable ${RUN_ACTION_INSTRUCTIONS_PHP_INC}"
-    "${BIN_PHPENV} rehash"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${_BIN_PHPENV} config-add ${_BLD_PATH}/${_RUN_ACTION_INSTRUCTIONS_PHP_INC}.ini"
+    "${_BIN_PHPENV} conf enable ${_RUN_ACTION_INSTRUCTIONS_PHP_INC}"
+    "${_BIN_PHPENV} rehash"
 )
 
-RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=(
-    "${BIN_PHPENV} conf add ${BLD_PATH}/${RUN_ACTION_INSTRUCTIONS_PHP_INC}.ini"
+_RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK=(
+    "${_BIN_PHPENV} conf add ${_BLD_PATH}/${_RUN_ACTION_INSTRUCTIONS_PHP_INC}.ini"
     "continue"
     "continue"
 )
 
-writeDebugSourcedFile "${BLD_PATH}/_php-configuration-runner.bash"
-. "${BLD_PATH}/_php-configuration-runner.bash"
+writeDebugSourcedFile "${_BLD_PATH}/_php-configuration-runner.bash"
+. "${_BLD_PATH}/_php-configuration-runner.bash"
 

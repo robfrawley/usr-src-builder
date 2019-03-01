@@ -9,9 +9,9 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="igbinary"
-MOD_PECL_GIT=https://github.com/igbinary/igbinary7
-MOD_PECL_GIT_BRANCH="master"
-MOD_PECL_FLAGS="--enable-igbinary"
+_MOD_NAME="igbinary"
+_MOD_PECL_GIT=https://github.com/igbinary/igbinary7
+_MOD_PECL_GIT_BRANCH="master"
+_MOD_PECL_FLAGS="--enable-igbinary"
 
 # EOF

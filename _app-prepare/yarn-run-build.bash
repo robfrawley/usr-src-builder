@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
+_RUN_ACTION_INSTRUCTIONS_CMD=(
 	"yarn run build"
 )
 

@@ -16,26 +16,26 @@ then
     set -x
 fi
 
-readonly BLDR_PATH_NAME="`cd $(dirname ${BASH_SOURCE[0]}) && pwd`"
-readonly BLDR_BASE_NAME="`basename ${BASH_SOURCE[0]}`"
-readonly BLDR_FILE_PATH="${BLDR_PATH_NAME}/${BLDR_BASE_NAME}"
-readonly BLDR_ROOT_PATH="$(pwd)"
+readonly _BLDR_PATH_NAME="`cd $(dirname ${BASH_SOURCE[0]}) && pwd`"
+readonly _BLDR_BASE_NAME="`basename ${BASH_SOURCE[0]}`"
+readonly _BLDR_FILE_PATH="${_BLDR_PATH_NAME}/${_BLDR_BASE_NAME}"
+readonly _BLDR_ROOT_PATH="$(pwd)"
 
-readonly BLDR_SRC_NAME="BLDR: Project State Builder"
-readonly BLDR_SRC_AUTHOR="Rob Frawley 2nd <rmf AT src DOT run>"
-readonly BLDR_SRC_LICENSE="MIT License, https://rmf.mit-license.org>"
-readonly BLDR_SRC_VEMVER="0.9.0-development"
+readonly _BLDR_SRC_NAME="BLDR: Project State Builder"
+readonly _BLDR_SRC_AUTHOR="Rob Frawley 2nd <rmf AT src DOT run>"
+readonly _BLDR_SRC_LICENSE="MIT License, https://rmf.mit-license.org>"
+readonly _BLDR_SRC_VEMVER="0.9.0-development"
 
-readonly VALID_ACTION_TYPE=(up down)
-readonly VALID_ACTION_CONTEXT=(env app)
-readonly VALID_ACTION_CONTEXT_UP=(${VALID_ACTION_CONTEXT[@]})
-readonly VALID_ACTION_CONTEXT_DN=(app env)
+readonly _VALID_ACTION_TYPE=(up down)
+readonly _VALID_ACTION_CONTEXT=(env app)
+readonly _VALID_ACTION_CONTEXT_UP=(${_VALID_ACTION_CONTEXT[@]})
+readonly _VALID_ACTION_CONTEXT_DN=(app env)
 
-export B_QUIET=0
-export B_VERY_QUIET=0
-export B_VERBOSE=0
-export B_VERY_VERBOSE=0
-export B_DEBUG=0
+export _BLD_OUT_QUIET=0
+export _BLD_OUT_VERY_QUIET=0
+export _BLD_OUT_VERBOSE=0
+export _BLD_OUT_VERY_VERBOSE=0
+export _BLD_OUT_DEBUG=0
 
 function outputError()
 {
@@ -45,7 +45,7 @@ function outputError()
 
 function outputWarning()
 {
-    if [[ ${B_VERY_QUIET} -eq 0 ]]; then
+    if [[ ${_BLD_OUT_VERY_QUIET} -eq 0 ]]; then
         printf "\n`tput setaf 3`%s: `tput sgr0`" "$1"
         printf "%s`tput sgr0`\n" "$2"
     fi
@@ -53,7 +53,7 @@ function outputWarning()
 
 function outputInfo()
 {
-    if [[ ${B_QUIET} -eq 0 ]]; then
+    if [[ ${_BLD_OUT_QUIET} -eq 0 ]]; then
         outputWarning "$1" "$2"
     fi
 }
@@ -61,7 +61,7 @@ function outputInfo()
 function outputCommandInfo()
 {
     printf "\n$(tput rev) %s $(tput sgr0)\nAuthor  : %s\nLicense : %s\nVersion : %s\n" \
-        "$BLDR_SRC_NAME" "$BLDR_SRC_AUTHOR" "$BLDR_SRC_LICENSE" "$BLDR_SRC_VEMVER"
+        "$_BLDR_SRC_NAME" "$_BLDR_SRC_AUTHOR" "$_BLDR_SRC_LICENSE" "$_BLDR_SRC_VEMVER"
 }
 
 function outputCommandUsage()
@@ -82,7 +82,7 @@ function outputCommandUsage()
             iteration=`echo $iteration + 1 | bc`
         fi
 
-        printf "./`tput bold`%s [OPTIONS] -b %s`tput sgr0`\n" "$BLDR_BASE_NAME" "$C"
+        printf "./`tput bold`%s [OPTIONS] -b %s`tput sgr0`\n" "$_BLDR_BASE_NAME" "$C"
     done
 
     printf "\nOptions:\n"
@@ -94,14 +94,14 @@ function outputCommandUsage()
     printf "`tput bold`    -h `tput sgr0`   display this usage/help message\n\n"
 }
 
-function arrayContainsElement() 
+function arrayContainsElement()
 {
     local e
-    
+
     for e in "${@:2}"; do
         [[ "$e" == "$1" ]] && return 0
     done
-    
+
     return 1
 }
 
@@ -118,44 +118,44 @@ while getopts ":hvdVqb:" opt; do
         ;;
 
         q)
-            if [[ ${B_VERBOSE} -eq 1 ]]; then
+            if [[ ${_BLD_OUT_VERBOSE} -eq 1 ]]; then
                 outputError "Invalid option sequence" "Use of both the verbose \"-V\" and quiet \"-q\" options is prohibited as these options conflict."
                 outputCommandUsage
                 exit 255
             fi
 
-            if [[ ${B_QUIET} -eq 1 ]]; then
-                export B_VERY_QUIET=1
+            if [[ ${_BLD_OUT_QUIET} -eq 1 ]]; then
+                export _BLD_OUT_VERY_QUIET=1
             fi
-            export B_QUIET=1
+            export _BLD_OUT_QUIET=1
         ;;
 
         V)
-            if [[ ${B_QUIET} -eq 1 ]]; then
+            if [[ ${_BLD_OUT_QUIET} -eq 1 ]]; then
                 outputError "Invalid option sequence" "Use of both the verbose \"-V\" and quiet \"-q\" options is prohibited as these options conflict."
                 outputCommandInfo
                 exit 255
             fi
 
-            if [[ ${B_VERY_VERBOSE} -eq 1 ]]; then
-                export B_DEBUG=1
+            if [[ ${_BLD_OUT_VERY_VERBOSE} -eq 1 ]]; then
+                export _BLD_OUT_DEBUG=1
             fi
 
-            if [[ ${B_VERBOSE} -eq 1 ]]; then
-                export B_VERY_VERBOSE=1
+            if [[ ${_BLD_OUT_VERBOSE} -eq 1 ]]; then
+                export _BLD_OUT_VERY_VERBOSE=1
             fi
 
-            export B_VERBOSE=1
+            export _BLD_OUT_VERBOSE=1
         ;;
 
         d)
             outputWarning "Debug mode enabled" "Issuing \"set -x\" to enable command tracing."
             set -x
-            export BUILDER_DEBUG=1
+            export _BUILDER_DEBUG=1
         ;;
 
         b)
-            BLDR_C="$OPTARG"
+            _BLDR_C="$OPTARG"
         ;;
 
         \?)
@@ -165,52 +165,56 @@ while getopts ":hvdVqb:" opt; do
     esac
 done
 
-export ACTION=$BLDR_C
-export ACTION_TYPE=${ACTION%-*}
-export ACTION_CONTEXT=(${ACTION#*-})
+export _ACTION=$_BLDR_C
+export _ACTION_TYPE=${_ACTION%-*}
+export _ACTION_CONTEXT=(${_ACTION#*-})
 
-if [[ -z "${BLDR_C+x}" ]]; then
+if [[ ${_ACTION_TYPE} == 'dn' ]]; then
+    _ACTION_TYPE='down'
+fi
+
+if [[ -z "${_BLDR_C+x}" ]]; then
     outputError "Invalid options" "The build mode must be provided via the \"-b\" option."
     outputCommandUsage
     exit 255
 fi
 
-if [[ ! "${VALID_ACTION_TYPE[@]}" =~ "${ACTION_TYPE}" ]]; then
-    outputError "Invalid options" "The provided build type \"${ACTION_TYPE}\" is invalid."
+if [[ ! "${_VALID_ACTION_TYPE[@]}" =~ "${_ACTION_TYPE}" ]]; then
+    outputError "Invalid options" "The provided build type \"${_ACTION_TYPE}\" is invalid."
     outputCommandUsage
     exit 255
 fi
 
-if [[ ! "${VALID_ACTION_CONTEXT[@]}" =~ "${ACTION_CONTEXT}" ]]; then
-    if [[ "${ACTION_CONTEXT}" == "${ACTION_TYPE}" ]]; then
-        if [[ "${ACTION_TYPE}" == "up" ]]; then
-            ACTION_CONTEXT=(${VALID_ACTION_CONTEXT_UP[@]})
+if [[ ! "${_VALID_ACTION_CONTEXT[@]}" =~ "${_ACTION_CONTEXT}" ]]; then
+    if [[ "${_ACTION_CONTEXT}" == "${_ACTION_TYPE}" ]]; then
+        if [[ "${_ACTION_TYPE}" == "up" ]]; then
+            _ACTION_CONTEXT=(${_VALID_ACTION_CONTEXT_UP[@]})
         else
-            ACTION_CONTEXT=(${VALID_ACTION_CONTEXT_DN[@]})
+            _ACTION_CONTEXT=(${_VALID_ACTION_CONTEXT_DN[@]})
         fi
     else
-        outputError "Invalid options" "The provided build context \"${ACTION_CONTEXT}\" is invalid."
+        outputError "Invalid options" "The provided build context \"${_ACTION_CONTEXT}\" is invalid."
         outputCommandUsage
         exit 255
     fi
 fi
 
-type writeLines &>> /dev/null || . ${BLDR_PATH_NAME}/_common/common.bash
+type writeLines &>> /dev/null || . ${_BLDR_PATH_NAME}/_common/common.bash
 
 listing=(
     ":Runtime Enviornment" \
     "Enviornment:OS"       "${DISTRIB_ID} ${DISTRIB_RELEASE}"
-    "Enviornment:Action"   "${ACTION^^}" \
+    "Enviornment:Action"   "${_ACTION^^}" \
     "Enviornment:Location" "${env_location^^}" \
     "Enviornment:Travis"   "$(getYesOrNoForCompare ${env_location} ci)" \
-    "Enviornment:Config"   "${BLDR_ROOT_PATH}/${PKG_ENV_VARIABLE}" \
+    "Enviornment:Config"   "${_BLDR_ROOT_PATH}/${_PKG_ENV_VARIABLE}" \
     \
     ":PHP/Engine Information" \
     "Release:PHP"           "$(getMajorPHPVersion).x Series" \
-    "Supported:PHP:Version" "$(getYesOrNoForCompare ${VER_PHP_ON_UNSU:-x} "x") (PHP     v${VER_PHP})" \
-    "Supported:PHP:Engine"  "YES (Engine  ${VER_PHPAPI_ENG}/${VER_PHPAPI_MOD})" \
-    "Supported:PHP:Xdebug"  "YES (Xdebug  v${VER_PHP_XDEBUG})" \
-    "Supported:PHP:Opcache" "YES (Opcache v${VER_PHP_OPCACHE})" \
+    "Supported:PHP:Version" "$(getYesOrNoForCompare ${_VER_PHP_ON_UNSU:-x} "x") (PHP     v${_VER_PHP})" \
+    "Supported:PHP:Engine"  "YES (Engine  ${_VER_PHPAPI_ENG}/${_VER_PHPAPI_MOD})" \
+    "Supported:PHP:Xdebug"  "YES (Xdebug  v${_VER_PHP_XDEBUG})" \
+    "Supported:PHP:Opcache" "YES (Opcache v${_VER_PHP_OPCACHE})" \
     "Installed:PHPEnv"      "$(echo ${env_with_phpenv} | tr '[:lower:]' '[:upper:]') ${env_ver_phpenv}" \
     "Installed:HHVM"        "$(echo ${env_with_hhvm} | tr '[:lower:]' '[:upper:]') ${env_ver_hhvm}" \
     \
@@ -227,29 +231,29 @@ listing=(
 
 writeDefinitionListing "${listing[@]}"
 
-if [ ! ${VER_PHP_ON_5} ] && [ ! ${VER_PHP_ON_7} ]; then
-    writeError "Unsupported PHP version for auto-builds. Found ${VER_PHP}."
+if [ ! ${_VER_PHP_ON_5} ] && [ ! ${_VER_PHP_ON_7} ]; then
+    writeError "Unsupported PHP version for auto-builds. Found ${_VER_PHP}."
 fi
 
-for context in ${ACTION_CONTEXT[@]}; do
-    export ACTION="${ACTION_TYPE}-${context}"
-    export ACTION_TYPE=${ACTION%-*}
-    export ACTION_CONTEXT=(${ACTION#*-})
+for context in ${_ACTION_CONTEXT[@]}; do
+    export _ACTION="${_ACTION_TYPE}-${context}"
+    export _ACTION_TYPE=${_ACTION%-*}
+    export _ACTION_CONTEXT=(${_ACTION#*-})
 
-    ACTION_FILE_INCLUDE="${BLDR_PATH_NAME}/$(basename ${BLDR_BASE_NAME} .bash)_${ACTION}.bash"
+    _ACTION_FILE_INCLUDE="${_BLDR_PATH_NAME}/$(basename ${_BLDR_BASE_NAME} .bash)_${_ACTION}.bash"
 
-    if [[ ! -f ${ACTION_FILE_INCLUDE} ]]; then
-        writeWarning "$(printf 'Operation file "%s" does not exist!' ${ACTION_FILE_INCLUDE})"
+    if [[ ! -f ${_ACTION_FILE_INCLUDE} ]]; then
+        writeWarning "$(printf 'Operation file "%s" does not exist!' ${_ACTION_FILE_INCLUDE})"
         exit 1
     fi
 
-    writeSectionEnter "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
-    writeDebugSourcedFile   "${ACTION_FILE_INCLUDE}"
-    . ${ACTION_FILE_INCLUDE}
-    writeSectionExit  "$(printf 'Running actions for "%s:%s" context' ${ACTION_TYPE} ${ACTION_CONTEXT})"
+    writeSectionEnter "$(printf 'Running actions for "%s:%s" context' ${_ACTION_TYPE} ${_ACTION_CONTEXT})"
+    writeDebugSourcedFile   "${_ACTION_FILE_INCLUDE}"
+    . ${_ACTION_FILE_INCLUDE}
+    writeSectionExit  "$(printf 'Running actions for "%s:%s" context' ${_ACTION_TYPE} ${_ACTION_CONTEXT})"
 done
 
-writeComplete "All operations for \"${ACTION}\" routine completed without error."
+writeComplete "All operations for \"${_ACTION}\" routine completed without error."
 
 exit 0
 

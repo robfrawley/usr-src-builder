@@ -11,12 +11,12 @@
 
 type writeLines &>> /dev/null || exit -1
 
-export BLD_MODE="app post"
-export BLD_MODE_DESC="application-tear-down"
-export BLD_MODE_APPEND=false
-export BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_app_post}))
-export BLD_PATH=${INC_APP_POST_PATH}
+export _BLD_MODE="app post"
+export _BLD_MODE_DESC="application-tear-down"
+export _BLD_MODE_APPEND=false
+export _BLD_INCS=($(commaToSpaceSeparated ${scr_pkg_app_post}))
+export _BLD_PATH=${_INC_APP_POST_PATH}
 
-writeDebugSourcedFile "${BLD_PATH}/_app-cleanup.bash"
-. "${BLD_PATH}/_app-cleanup.bash"
+writeDebugSourcedFile "${_BLD_PATH}/_app-cleanup.bash"
+. "${_BLD_PATH}/_app-cleanup.bash"
 

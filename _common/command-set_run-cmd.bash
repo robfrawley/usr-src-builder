@@ -9,36 +9,36 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_COUNT=-1
+_RUN_ACTION_COUNT=-1
 
-for cmd in "${RUN_ACTION_INSTRUCTIONS_CMD[@]}"
+for cmd in "${_RUN_ACTION_INSTRUCTIONS_CMD[@]}"
 do
-    RUN_ACTION_COUNT=$(((${RUN_ACTION_COUNT} + 1)))
+    _RUN_ACTION_COUNT=$(((${_RUN_ACTION_COUNT} + 1)))
 
-    RUN_ACTION_RETURN_LAST=0
-    doRunCmdInline "${cmd}" || RUN_ACTION_RETURN_LAST=$?
+    _RUN_ACTION_RETURN_LAST=0
+    doRunCmdInline "${cmd}" || _RUN_ACTION_RETURN_LAST=$?
 
-    if [[ ${RUN_ACTION_RETURN_LAST} == 0 ]]; then
+    if [[ ${_RUN_ACTION_RETURN_LAST} == 0 ]]; then
         continue;
     fi
 
-    if [ ${RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$RUN_ACTION_COUNT]+x} ]; then
-        if [[ "${RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$RUN_ACTION_COUNT]}" == "continue" ]]; then
+    if [ ${_RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$_RUN_ACTION_COUNT]+x} ]; then
+        if [[ "${_RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$_RUN_ACTION_COUNT]}" == "continue" ]]; then
             writeSmallWarning "Command configured to continue on failure..."
             continue;
         fi
 
         writeSmallWarning "Command fallback will be attempted..."
 
-        RUN_ACTION_RETURN_LAST=0
-        doRunCmdInline "${RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$RUN_ACTION_COUNT]}" || RUN_ACTION_RETURN_LAST=$?
+        _RUN_ACTION_RETURN_LAST=0
+        doRunCmdInline "${_RUN_ACTION_INSTRUCTIONS_CMD_FALLBACK[$_RUN_ACTION_COUNT]}" || _RUN_ACTION_RETURN_LAST=$?
     fi
 
-    if [[ ${RUN_ACTION_RETURN_LAST} == 0 ]]; then
+    if [[ ${_RUN_ACTION_RETURN_LAST} == 0 ]]; then
         continue;
     fi
 
-    writeFailedLogOutput "${RUN_ACTION_SOURCE_LOGS}" "${BLD_MODE}:${cmd}"
+    writeFailedLogOutput "${_RUN_ACTION_SOURCE_LOGS}" "${_BLD_MODE}:${cmd}"
     writeError "Exiting due to command failures!"
 done
 

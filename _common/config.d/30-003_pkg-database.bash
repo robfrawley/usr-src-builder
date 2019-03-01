@@ -9,8 +9,6 @@
 # file distributed with this source code.
 ##
 
-_RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${_APP_MAKE_CLI} doctrine:database:create -n"
-    "${_APP_MAKE_CLI} doctrine:schema:create -n"
-)
-
+export _BLD_DB_USER="${_BLD_DB_USER:-root}"
+export _BLD_DB_PASS="${_BLD_DB_PASS:-}"
+export _BLD_DB_NAME="${_BLD_DB_NAME:-}"

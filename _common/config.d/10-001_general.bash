@@ -9,8 +9,7 @@
 # file distributed with this source code.
 ##
 
-_RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${_APP_MAKE_CLI} doctrine:database:create -n"
-    "${_APP_MAKE_CLI} doctrine:schema:create -n"
-)
-
+export _CMD_PRE=""
+export _CMD_ENV=""
+export _DIR_CWD="$(pwd)"
+export _TMP_DIR="$(readlink -m "${_DIR_CWD}/var")"

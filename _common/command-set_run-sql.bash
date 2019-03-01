@@ -9,17 +9,17 @@
 # file distributed with this source code.
 ##
 
-for statement in "${RUN_ACTION_INSTRUCTIONS_SQL[@]}"; do
-    RUN_ACTION_COUNT=$(((${RUN_ACTION_COUNT} + 1)))
-    RUN_ACTION_RETURN_LAST=0
+for statement in "${_RUN_ACTION_INSTRUCTIONS_SQL[@]}"; do
+    _RUN_ACTION_COUNT=$(((${_RUN_ACTION_COUNT} + 1)))
+    _RUN_ACTION_RETURN_LAST=0
 
-    doRunSqlStatement "${statement}" || RUN_ACTION_RETURN_LAST=1
+    doRunSqlStatement "${statement}" || _RUN_ACTION_RETURN_LAST=1
 
-    if [[ ${RUN_ACTION_RETURN_LAST} == 0 ]]; then
+    if [[ ${_RUN_ACTION_RETURN_LAST} == 0 ]]; then
         continue;
     fi
 
-    writeFailedLogOutput "${RUN_ACTION_SOURCE_LOGS}" "${BLD_MODE}:${c}"
+    writeFailedLogOutput "${_RUN_ACTION_SOURCE_LOGS}" "${_BLD_MODE}:${c}"
     writeError "Exiting due to sql statement failures!"
 done
 

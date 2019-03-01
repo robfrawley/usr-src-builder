@@ -9,9 +9,9 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="redis"
-MOD_PECL_GIT=https://github.com/phpredis/phpredis.git
-MOD_PECL_FLAGS="--enable-redis-igbinary"
-MOD_PECL_GIT_BRANCH="php7"
+_MOD_NAME="redis"
+_MOD_PECL_GIT=https://github.com/phpredis/phpredis.git
+_MOD_PECL_FLAGS="--enable-redis-igbinary"
+_MOD_PECL_GIT_BRANCH="php7"
 
 # EOF

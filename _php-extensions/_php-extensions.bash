@@ -9,16 +9,16 @@
 # file distributed with this source code.
 ##
 
-if [[ ${BLD_MODE_DESC} == false ]]; then
-    BLD_MODE_DESC="${BLD_MODE}"
+if [[ ${_BLD_MODE_DESC} == false ]]; then
+    _BLD_MODE_DESC="${_BLD_MODE}"
 fi
 
-writeEnvironmentEnter "${BLD_MODE_DESC}"
+writeEnvironmentEnter "${_BLD_MODE_DESC}"
 
-for e in "${BLD_INCS[@]}"; do
-    RUN_ACTION_INSTRUCTIONS_PHP_EXT="${e}"
-	writeActionSourcedFile "${BLD_PATH}/_php-extensions-add.bash" "${e}"
-    . "${BLD_PATH}/_php-extensions-add.bash"
+for e in "${_BLD_INCS[@]}"; do
+    _RUN_ACTION_INSTRUCTIONS_PHP_EXT="${e}"
+	writeActionSourcedFile "${_BLD_PATH}/_php-extensions-add.bash" "${e}"
+    . "${_BLD_PATH}/_php-extensions-add.bash"
 done
 
-writeEnvironmentExit "${BLD_MODE_DESC}"
+writeEnvironmentExit "${_BLD_MODE_DESC}"

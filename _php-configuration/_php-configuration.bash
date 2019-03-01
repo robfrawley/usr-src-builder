@@ -9,22 +9,22 @@
 # file distributed with this source code.
 ##
 
-BLD_MODE_THIS_DESC="${BLD_MODE}"
+_BLD_MODE_THIS_DESC="${_BLD_MODE}"
 
-if [[ ${BLD_MODE_DESC} != false ]]; then
-    BLD_MODE_THIS_DESC="${BLD_MODE_DESC}"
+if [[ ${_BLD_MODE_DESC} != false ]]; then
+    _BLD_MODE_THIS_DESC="${_BLD_MODE_DESC}"
 fi
 
-writeEnvironmentEnter "${BLD_MODE_DESC}"
+writeEnvironmentEnter "${_BLD_MODE_DESC}"
 
-for c in "${BLD_INCS[@]}"; do
-    RUN_ACTION_INSTRUCTIONS_PHP_INC="${c}"
-    writeActionSourcedFile "${BLD_PATH}/_php-configuration-add.bash" "${c}"
-    . "${BLD_PATH}/_php-configuration-add.bash"
+for c in "${_BLD_INCS[@]}"; do
+    _RUN_ACTION_INSTRUCTIONS_PHP_INC="${c}"
+    writeActionSourcedFile "${_BLD_PATH}/_php-configuration-add.bash" "${c}"
+    . "${_BLD_PATH}/_php-configuration-add.bash"
 done
 
-if [[ ${BLD_MODE_DESC} == false ]]; then
-    BLD_MODE_DESC="${BLD_MODE}"
+if [[ ${_BLD_MODE_DESC} == false ]]; then
+    _BLD_MODE_DESC="${_BLD_MODE}"
 fi
 
-writeEnvironmentExit "${BLD_MODE_THIS_DESC}"
+writeEnvironmentExit "${_BLD_MODE_THIS_DESC}"

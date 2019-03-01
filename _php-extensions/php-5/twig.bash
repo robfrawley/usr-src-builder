@@ -9,10 +9,10 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="twig"
-MOD_PECL_GIT=https://github.com/twigphp/Twig.git
-MOD_PECL_GIT_BRANCH="v1.22.3"
-MOD_PECL_FLAGS="--enable-twig"
-MOD_PECL_CD="twig/ext/twig"
+_MOD_NAME="twig"
+_MOD_PECL_GIT=https://github.com/twigphp/Twig.git
+_MOD_PECL_GIT_BRANCH="v1.22.3"
+_MOD_PECL_FLAGS="--enable-twig"
+_MOD_PECL_CD="twig/ext/twig"
 
 # EOF

@@ -9,9 +9,9 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="memcached"
-MOD_PECL_GIT=https://github.com/php-memcached-dev/php-memcached.git
-MOD_PECL_GIT_BRANCH="php7"
-MOD_PECL_FLAGS="--enable-memcached-json"
+_MOD_NAME="memcached"
+_MOD_PECL_GIT=https://github.com/php-memcached-dev/php-memcached.git
+_MOD_PECL_GIT_BRANCH="php7"
+_MOD_PECL_FLAGS="--enable-memcached-json"
 
 # EOF

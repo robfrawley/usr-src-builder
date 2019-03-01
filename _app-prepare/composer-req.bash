@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${BIN_PHP} ${DIR_CWD}/composer update -n"
+_RUN_ACTION_INSTRUCTIONS_CMD=(
+    "${_BIN_PHP} ${_DIR_CWD}/composer update -n"
 )
 

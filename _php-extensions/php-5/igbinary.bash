@@ -9,7 +9,7 @@
 # file distributed with this source code.
 ##
 
-MOD_NAME="igbinary"
-MOD_PECL_DL=true
+_MOD_NAME="igbinary"
+_MOD_PECL_DL=true
 
 # EOF

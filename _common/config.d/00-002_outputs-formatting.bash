@@ -9,8 +9,8 @@
 # file distributed with this source code.
 ##
 
-_RUN_ACTION_INSTRUCTIONS_CMD=(
-    "${_APP_MAKE_CLI} doctrine:database:create -n"
-    "${_APP_MAKE_CLI} doctrine:schema:create -n"
-)
-
+export _OUT_NEW_LINE=true
+export _OUT_PRE_LINE=true
+export _OUT_MAX_CHAR=100
+export _OUT_SPACE_F=1
+export _OUT_SPACE_N=1
